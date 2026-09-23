@@ -282,6 +282,8 @@
       line-height: 1.45;
     }
     .vorgaenger b { color: #1a202c; }
+    .vg-titel { display: block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #718096; }
+    .vg-name { display: block; font-size: 1.05rem; font-weight: 700; color: #1a202c; margin: 0.1rem 0 0.15rem; }
     .vorgaenger a { color: #2b6cb0; font-weight: 600; }
     .vorgaenger.warn { background: #fffaf0; border-color: #f6ad55; }
 
@@ -387,34 +389,17 @@
       </div>
 
       <div class="form-group">
-        <label>Foto Innenraum (Fahrgastraum)</label>
-        <label class="foto-btn" id="btnInnen" for="fotoInnen">📷 Foto aufnehmen / wählen</label>
-        <input type="file" id="fotoInnen" accept="image/*" capture="environment" hidden />
-        <img class="foto-preview" id="previewInnen" alt="Vorschau Innenraum" />
+        <label>Foto Innenraum vorne</label>
+        <label class="foto-btn" id="btnInnenVorne" for="fotoInnenVorne">📷 Foto aufnehmen / wählen</label>
+        <input type="file" id="fotoInnenVorne" accept="image/*" capture="environment" hidden />
+        <img class="foto-preview" id="previewInnenVorne" alt="Vorschau Innenraum vorne" />
       </div>
 
       <div class="form-group">
-        <label for="innenraumSauber">Innenraum sauber?</label>
-        <select id="innenraumSauber" required>
-          <option value="">– bitte wählen –</option>
-          <option value="Ja">Ja</option>
-          <option value="Nein">Nein</option>
-        </select>
-        <div class="hinweis" id="innenHinweis" hidden></div>
-      </div>
-
-      <div class="form-group">
-        <label for="verordnungen">Verordnungen / Beförderungsscheine im Fahrzeug?</label>
-        <select id="verordnungen" required>
-          <option value="">– bitte wählen –</option>
-          <option value="Nein">Nein</option>
-          <option value="Ja">Ja</option>
-        </select>
-      </div>
-
-      <div class="form-group" id="verordnungBox" style="display:none;">
-        <label for="verordnungAnzahl">Anzahl Beförderungsscheine (optional)</label>
-        <input type="number" id="verordnungAnzahl" min="0" inputmode="numeric" placeholder="z. B. 3" />
+        <label>Foto Innenraum hinten</label>
+        <label class="foto-btn" id="btnInnenHinten" for="fotoInnenHinten">📷 Foto aufnehmen / wählen</label>
+        <input type="file" id="fotoInnenHinten" accept="image/*" capture="environment" hidden />
+        <img class="foto-preview" id="previewInnenHinten" alt="Vorschau Innenraum hinten" />
       </div>
 
       <div class="form-group">
@@ -445,17 +430,10 @@
 
     // Warnleuchten / Meldungen zur Auswahl
     const WARN_OPTIONEN = [
-      "Reifendruck / Luftdruck",
+      "Reifendruck",
       "Motorkontrollleuchte",
-      "Ölstand / Öldruck",
-      "Bremssystem",
-      "AdBlue",
-      "Kühlmittel / Temperatur",
-      "Batterie / Ladekontrolle",
-      "ABS",
-      "Airbag",
-      "Vorglühen (Diesel)",
-      "Sonstige"
+      "Öl",
+      "Inspektion"
     ];
 
     // Maße/Qualität für die Foto-Komprimierung
@@ -512,10 +490,12 @@
         }
       });
     }
-    let fotoInnenData = null;
+    let fotoInnenVorneData = null;
+    let fotoInnenHintenData = null;
     fotoHandler("fotoVorne", "btnVorne", "previewVorne", (d) => fotoVorneData = d);
     fotoHandler("fotoHinten", "btnHinten", "previewHinten", (d) => fotoHintenData = d);
-    fotoHandler("fotoInnen", "btnInnen", "previewInnen", (d) => fotoInnenData = d);
+    fotoHandler("fotoInnenVorne", "btnInnenVorne", "previewInnenVorne", (d) => fotoInnenVorneData = d);
+    fotoHandler("fotoInnenHinten", "btnInnenHinten", "previewInnenHinten", (d) => fotoInnenHintenData = d);
 
     // ====== KONTROLLART (Arbeitsbeginn / Arbeitsende) ======
     function kontrollart() {
@@ -528,7 +508,6 @@
       document.querySelectorAll("[data-optional-ende]").forEach((el) => (el.hidden = !ende));
       document.getElementById("submitBtn").textContent =
         kontrollart() ? kontrollart() + " absenden" : "Kontrolle absenden";
-      aktualisiereInnenHinweis();
       zeigeVorgaenger();
     }
     document.querySelectorAll('input[name="kontrollart"]').forEach((r) =>
@@ -561,7 +540,7 @@
       const fzg = fahrzeugText();
       const box = document.getElementById("vorgaengerBox");
       vorgaenger = null;
-      if (!fzg || APPS_SCRIPT_URL.startsWith("HIER_DEINE")) { box.hidden = true; aktualisiereInnenHinweis(); return; }
+      if (!fzg || APPS_SCRIPT_URL.startsWith("HIER_DEINE")) { box.hidden = true; return; }
       const nr = ++vorgaengerAnfrage;
       box.hidden = false;
       box.className = "vorgaenger";
@@ -578,50 +557,32 @@
         vorgaenger = null;
       }
       zeigeVorgaenger();
-      aktualisiereInnenHinweis();
     }
 
     function zeigeVorgaenger() {
       const box = document.getElementById("vorgaengerBox");
       if (!fahrzeugText()) { box.hidden = true; return; }
+      box.hidden = false;
+      box.className = "vorgaenger";
       if (!vorgaenger) {
-        box.hidden = false;
-        box.className = "vorgaenger";
-        box.textContent = "Keine vorherige Kontrolle einer anderen Person gefunden.";
+        box.textContent = "Kein vorheriger Fahrer für dieses Fahrzeug gefunden.";
         return;
       }
       const v = vorgaenger;
-      const innen = v.innenraum === "Ja" ? "sauber ✓" : v.innenraum === "Nein" ? "nicht sauber ✗" : "–";
-      const foto = v.fotoInnenraum
-        ? ' · <a href="' + esc(v.fotoInnenraum) + '" target="_blank" rel="noopener">Innenraum-Foto ansehen</a>'
-        : "";
-      box.hidden = false;
-      box.className = "vorgaenger" + (v.innenraum === "Nein" ? " warn" : "");
-      box.innerHTML = "Zuletzt: <b>" + esc(v.name) + "</b>" +
-        (v.art ? " · " + esc(v.art) : "") + " · " + esc(v.zeit) +
-        "<br>Innenraum laut Vorgänger: <b>" + innen + "</b>" + foto;
+      const links = [];
+      if (v.fotoInnenVorne)  links.push('<a href="' + esc(v.fotoInnenVorne) + '" target="_blank" rel="noopener">Innenraum vorne</a>');
+      if (v.fotoInnenHinten) links.push('<a href="' + esc(v.fotoInnenHinten) + '" target="_blank" rel="noopener">Innenraum hinten</a>');
+      box.innerHTML =
+        '<span class="vg-titel">Vorheriger Fahrer</span>' +
+        '<span class="vg-name">' + esc(v.name.trim()) + '</span>' +
+        (v.art ? esc(v.art) + " · " : "") + esc(v.zeit) +
+        (links.length ? "<br>Seine Fotos: " + links.join(" · ") : "");
     }
 
     ["fahrzeug-prefix", "fahrzeug-nummer"].forEach((id) =>
       document.getElementById(id).addEventListener("change", ladeVorgaenger));
 
-    // ====== HINWEIS BEI VERSCHMUTZTEM INNENRAUM ======
-    const innenSel = document.getElementById("innenraumSauber");
-    function aktualisiereInnenHinweis() {
-      const h = document.getElementById("innenHinweis");
-      if (innenSel.value !== "Nein") { h.hidden = true; return; }
-      h.hidden = false;
-      if (kontrollart() === "Arbeitsbeginn") {
-        h.innerHTML = vorgaenger
-          ? "Wird vermerkt: <b>verschmutzt übernommen von " + esc(vorgaenger.name) + "</b>. Bitte das Innenraum-Foto so aufnehmen, dass die Verschmutzung zu sehen ist."
-          : "Wird als verschmutzt übernommen vermerkt. Bitte das Innenraum-Foto so aufnehmen, dass die Verschmutzung zu sehen ist.";
-      } else if (kontrollart() === "Arbeitsende") {
-        h.innerHTML = "Das Fahrzeug wird <b>verschmutzt abgegeben</b> – das wird dir zugeordnet. Bitte vor der Abgabe reinigen.";
-      } else {
-        h.textContent = "Bitte das Innenraum-Foto so aufnehmen, dass die Verschmutzung zu sehen ist.";
-      }
-    }
-    innenSel.addEventListener("change", aktualisiereInnenHinweis);
+
 
     // ====== BEDINGTE FELDER ======
     const schaedenSel = document.getElementById("schaeden");
@@ -633,14 +594,7 @@
       if (!ja) schadenText.value = "";
     });
 
-    const verordnungenSel = document.getElementById("verordnungen");
-    const verordnungBox = document.getElementById("verordnungBox");
-    const verordnungAnzahl = document.getElementById("verordnungAnzahl");
-    verordnungenSel.addEventListener("change", () => {
-      const ja = verordnungenSel.value === "Ja";
-      verordnungBox.style.display = ja ? "block" : "none";
-      if (!ja) verordnungAnzahl.value = "";
-    });
+
 
     // ====== MEHRFACHAUSWAHL (Warnleuchten) ======
     const msToggle = document.getElementById("msToggle");
@@ -704,9 +658,9 @@
         status.textContent = "Bitte beide Fotos (vorne und hinten) aufnehmen.";
         return;
       }
-      if (!fotoInnenData) {
+      if (!fotoInnenVorneData || !fotoInnenHintenData) {
         status.className = "status error";
-        status.textContent = "Bitte ein Foto vom Innenraum aufnehmen.";
+        status.textContent = "Bitte beide Innenraum-Fotos (vorne und hinten) aufnehmen.";
         return;
       }
       if (schaedenSel.value === "Ja" && !schadenText.value.trim()) {
@@ -720,16 +674,14 @@
 
       const data = {
         kontrollart:         kontrollart(),
-        fotoInnenraum:       fotoInnenData,
+        fotoInnenVorne:      fotoInnenVorneData,
+        fotoInnenHinten:     fotoInnenHintenData,
         name:               document.getElementById("name").value,
         fahrzeug:            document.getElementById("fahrzeug-prefix").value + "-VM " + document.getElementById("fahrzeug-nummer").value,
         datum:               document.getElementById("datum").value,
         kilometerstand:      document.getElementById("kilometerstand").value,
         schaeden:            schaedenSel.value,
         schadenBeschreibung: schadenText.value.trim(),
-        innenraumSauber:     document.getElementById("innenraumSauber").value,
-        verordnungen:        verordnungenSel.value,
-        verordnungenAnzahl:  verordnungAnzahl.value,
         meldungen:           ausgewaehlteWarnungen(),
         notiz:               document.getElementById("notiz").value,
         fotoVorne:           fotoVorneData,
@@ -756,8 +708,7 @@
         if (result.status !== "ok") throw new Error(result.message || "Serverfehler");
 
         status.className = "status success";
-        status.textContent = data.kontrollart + " erfolgreich gespeichert!" +
-          (result.verschmutztVon ? " Verschmutzung wurde " + result.verschmutztVon + " zugeordnet." : "");
+        status.textContent = data.kontrollart + " erfolgreich gespeichert!";
         formularZuruecksetzen();
         btn.disabled = false;
         return;
@@ -777,21 +728,21 @@
       document.getElementById("datum").valueAsDate = new Date();
       fotoVorneData = null;
       fotoHintenData = null;
-      fotoInnenData = null;
+      fotoInnenVorneData = null;
+      fotoInnenHintenData = null;
       vorgaenger = null;
       document.getElementById("vorgaengerBox").hidden = true;
-      ["previewVorne", "previewHinten", "previewInnen"].forEach((id) => {
+      ["previewVorne", "previewHinten", "previewInnenVorne", "previewInnenHinten"].forEach((id) => {
         const p = document.getElementById(id);
         p.src = ""; p.classList.remove("sichtbar");
       });
       aktualisiereArt();
-      [["btnVorne"], ["btnHinten"], ["btnInnen"]].forEach(([id]) => {
+      [["btnVorne"], ["btnHinten"], ["btnInnenVorne"], ["btnInnenHinten"]].forEach(([id]) => {
         const b = document.getElementById(id);
         b.textContent = "📷 Foto aufnehmen / wählen";
         b.classList.remove("gesetzt");
       });
       schadenBox.style.display = "none";
-      verordnungBox.style.display = "none";
       msPanel.querySelectorAll("input:checked").forEach((c) => (c.checked = false));
       aktualisiereWarnLabel();
     }
