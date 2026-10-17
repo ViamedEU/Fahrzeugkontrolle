@@ -3,314 +3,180 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
   <title>Fahrzeugkontrolle</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <style>/* Fuhrpark-Apps v4 – gemeinsames Stylesheet (Fahrer-App + Dispo-App) */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f4f8; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 1rem; color: #2d3748; }
+.card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.10); padding: 1.75rem 1.25rem 2rem; width: 100%; max-width: 480px; overflow: hidden; }
+@media (min-width: 520px) { body { padding: 1.5rem; align-items: center; } .card { padding: 2.5rem 2rem; } }
+.card-header { text-align: center; margin-bottom: 1.5rem; }
+.card-header img { height: 64px; width: auto; margin-bottom: 0.75rem; }
+.card-header h1 { font-size: 1.4rem; font-weight: 700; color: #1a202c; }
+.card-header p { color: #718096; font-size: 0.9rem; margin-top: 0.3rem; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f0f4f8;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-    }
+.form-group { margin-bottom: 1.25rem; min-width: 0; }
+label { display: block; font-size: 0.85rem; font-weight: 600; color: #4a5568; margin-bottom: 0.4rem; }
+input, select, textarea { width: 100%; padding: 0.65rem 0.9rem; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 1rem; color: #2d3748; transition: border-color 0.2s; background: #f7fafc; -webkit-appearance: none; appearance: none; height: 48px; display: block; font-family: inherit; }
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23718096' stroke-width='1.8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; padding-right: 2.2rem; }
+textarea { height: auto; min-height: 84px; resize: vertical; line-height: 1.4; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #4299e1; background: #fff; }
+[hidden] { display: none !important; }
+input[type="checkbox"] { width: 20px; height: 20px; -webkit-appearance: auto; appearance: auto; display: inline-block; accent-color: #3182ce; padding: 0; flex: none; }
+.check-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.95rem; font-weight: 600; color: #2d3748; margin: 0; cursor: pointer; }
+.statisch { padding: 0.65rem 0.9rem; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #edf2f7; color: #4a5568; font-size: 1rem; }
+.optional { font-weight: 500; color: #a0aec0; }
+.hilfe { font-size: 0.78rem; color: #718096; margin-top: 0.4rem; line-height: 1.4; }
+.fehlt { border-color: #e53e3e !important; background: #fff5f5 !important; }
 
-    .card {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-      padding: 2.5rem 2rem;
-      width: 100%;
-      max-width: 440px;
-      overflow: hidden;
-    }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.btn-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.6rem; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.55rem 0.9rem; border-radius: 8px; border: 1.5px solid #cbd5e0; background: #fff; color: #2d3748; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; min-height: 40px; }
+.btn.primary { background: #3182ce; border-color: #3182ce; color: #fff; }
+.btn.danger { background: #fff5f5; border-color: #feb2b2; color: #9b2c2c; }
+.btn.ok { background: #f0fff4; border-color: #9ae6b4; color: #276749; }
+.btn.klein { padding: 0.35rem 0.6rem; font-size: 0.8rem; min-height: 32px; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+button[type="submit"], .btn.senden { width: 100%; padding: 0.85rem; background: #3182ce; color: #fff; font-size: 1rem; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; margin-top: 0.5rem; transition: background 0.2s; min-height: 52px; font-family: inherit; }
+button[type="submit"]:hover { background: #2b6cb0; }
+button[type="submit"]:disabled { background: #90cdf4; cursor: not-allowed; }
 
-    .card-header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
+/* Umschalter (Arbeitsbeginn / Arbeitsende, Ja / Nein) */
+.switch { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.switch input { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; left: 0; top: 0; overflow: hidden; }
+.switch-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.15rem; min-height: 56px; margin: 0; padding: 0.5rem; border: 1.5px solid #e2e8f0; border-radius: 10px; background: #f7fafc; color: #4a5568; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; transition: border-color 0.2s, background 0.2s, color 0.2s; }
+.switch-btn small { font-size: 0.75rem; font-weight: 500; color: #718096; }
+.switch input:checked + .switch-btn { border-color: #3182ce; background: #ebf8ff; color: #2b6cb0; }
+.switch input:checked + .switch-btn small { color: #2b6cb0; }
+.switch input:focus-visible + .switch-btn { outline: 2px solid #4299e1; outline-offset: 2px; }
+.switch.gross .switch-btn { min-height: 64px; }
 
-    .card-header img {
-      height: 72px;
-      width: auto;
-      margin-bottom: 1rem;
-    }
+/* Fotos */
+.foto-btn { display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; min-height: 48px; padding: 0.7rem; border: 1.5px dashed #cbd5e0; border-radius: 8px; background: #f7fafc; color: #4a5568; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: border-color 0.2s, background 0.2s; margin: 0; }
+.foto-btn.gesetzt { border-style: solid; border-color: #68d391; background: #f0fff4; color: #276749; }
+.foto-preview { display: none; width: 100%; margin-top: 0.6rem; border-radius: 8px; border: 1px solid #e2e8f0; }
+.foto-preview.sichtbar { display: block; }
 
-    .card-header h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #1a202c;
-    }
+/* Mehrfachauswahl */
+.multiselect { position: relative; }
+.ms-toggle { width: 100%; height: 48px; padding: 0.65rem 0.9rem; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #f7fafc; font-size: 1rem; color: #2d3748; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; cursor: pointer; text-align: left; font-family: inherit; }
+.ms-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-label.placeholder { color: #a0aec0; }
+.ms-caret { color: #718096; flex: none; transition: transform 0.2s; }
+.ms-toggle[aria-expanded="true"] .ms-caret { transform: rotate(180deg); }
+.ms-panel { display: none; position: absolute; z-index: 20; left: 0; right: 0; margin-top: 0.3rem; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); max-height: 260px; overflow-y: auto; padding: 0.3rem; }
+.ms-panel.open { display: block; }
+.ms-option { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 0.6rem; margin: 0; font-size: 0.95rem; font-weight: 500; color: #2d3748; border-radius: 6px; cursor: pointer; }
+.ms-option:hover { background: #f0f4f8; }
 
-    .card-header p {
-      color: #718096;
-      font-size: 0.9rem;
-      margin-top: 0.3rem;
-    }
+/* Info-Boxen */
+.box { margin-top: 0.6rem; padding: 0.75rem 0.85rem; border-radius: 8px; background: #f7fafc; border: 1px solid #e2e8f0; font-size: 0.85rem; color: #4a5568; line-height: 1.45; }
+.box b { color: #1a202c; }
+.box a { color: #2b6cb0; font-weight: 600; }
+.box.info { background: #ebf8ff; border-color: #bee3f8; color: #2a4365; }
+.box.warn { background: #fffaf0; border-color: #f6ad55; color: #7b341e; }
+.box.fehler { background: #fff5f5; border-color: #feb2b2; color: #9b2c2c; }
+.box.ok { background: #f0fff4; border-color: #9ae6b4; color: #276749; }
+.box-titel { display: block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #718096; margin-bottom: 0.15rem; }
+.box.warn .box-titel, .box.fehler .box-titel { color: inherit; opacity: 0.8; }
+.vg-name { display: block; font-size: 1.05rem; font-weight: 700; color: #1a202c; margin: 0.1rem 0 0.15rem; }
 
-    .form-group {
-      margin-bottom: 1.25rem;
-      min-width: 0;
-    }
+.status { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.9rem; text-align: center; display: none; line-height: 1.45; }
+.status.success { background: #c6f6d5; color: #276749; display: block; }
+.status.error { background: #fed7d7; color: #9b2c2c; display: block; }
+.status.info { background: #bee3f8; color: #2a4365; display: block; }
+.status ul { text-align: left; margin: 0.5rem 0 0 1.1rem; }
 
-    label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #4a5568;
-      margin-bottom: 0.4rem;
-    }
+/* Abschnitte / Tabs */
+.abschnitt { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #2b6cb0; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.4rem; margin: 1.75rem 0 1rem; }
+.tabs { display: flex; gap: 0.35rem; margin-bottom: 1.25rem; background: #edf2f7; padding: 0.3rem; border-radius: 10px; }
+.tab-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem; min-height: 56px; padding: 0.45rem 0.3rem; border: none; border-radius: 8px; background: transparent; color: #4a5568; font-weight: 700; font-size: 0.85rem; line-height: 1.2; cursor: pointer; font-family: inherit; position: relative; }
+.tab-btn.active { background: #fff; color: #2b6cb0; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+.tab-btn .badge { margin-left: 0; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+.badge { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 10px; background: #e53e3e; color: #fff; font-size: 0.72rem; line-height: 20px; margin-left: 0.3rem; vertical-align: middle; }
+.badge.leer { background: #a0aec0; }
 
-    input, select, textarea {
-      width: 100%;
-      padding: 0.65rem 0.9rem;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 1rem;
-      color: #2d3748;
-      transition: border-color 0.2s;
-      background: #f7fafc;
-      box-sizing: border-box;
-      -webkit-appearance: none;
-      appearance: none;
-      height: 48px;
-      display: block;
-      font-family: inherit;
-    }
+/* Skizze + Marker */
+.skizze-wrap { display: none; position: relative; border: 1.5px solid #e2e8f0; border-radius: 10px; overflow: hidden; background: #fff; touch-action: manipulation; }
+.skizze-wrap.sichtbar { display: block; }
+.skizze-wrap.interaktiv { border-color: #fc8181; cursor: crosshair; }
+.skizze-wrap img { display: block; width: 100%; height: auto; user-select: none; -webkit-user-drag: none; }
+.skizze-marker { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; background: #e53e3e; color: #fff; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.35); cursor: pointer; border: 2px solid #fff; }
+.skizze-marker.alt { background: #718096; }
+.skizze-marker.gemeldet { background: #dd6b20; }
+.skizze-marker.aktiv { box-shadow: 0 0 0 4px rgba(66,153,225,0.55); }
+.skizze-hinweis { font-size: 0.78rem; color: #718096; margin-top: 0.4rem; }
+.marker-liste { margin-top: 0.75rem; }
+.marker-zeile { display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.6rem; padding: 0.5rem; border-radius: 8px; background: #f7fafc; border: 1px solid #e2e8f0; }
+.marker-zeile.neu { border-color: #feb2b2; background: #fff5f5; }
+.marker-zeile.aktiv { border-color: #4299e1; background: #ebf8ff; }
+.marker-nr { flex: none; width: 26px; height: 26px; border-radius: 50%; background: #e53e3e; color: #fff; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 0.15rem; }
+.marker-nr.alt { background: #718096; }
+.marker-nr.gemeldet { background: #dd6b20; }
+.marker-inhalt { flex: 1; min-width: 0; font-size: 0.9rem; color: #2d3748; line-height: 1.4; }
+.marker-inhalt small { display: block; color: #718096; font-size: 0.78rem; }
+.marker-inhalt input, .marker-inhalt textarea { height: 40px; font-size: 0.9rem; margin-bottom: 0.4rem; }
+.marker-inhalt textarea { height: auto; min-height: 56px; }
+.marker-inhalt .foto-btn { min-height: 40px; font-size: 0.85rem; }
+.marker-inhalt .foto-preview { margin-top: 0.4rem; }
+.marker-aktionen { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.4rem; }
+.chip { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; background: #edf2f7; color: #4a5568; white-space: nowrap; }
+.chip.offen { background: #feebc8; color: #7b341e; }
+.chip.nichtrepariert { background: #fed7d7; color: #9b2c2c; }
+.chip.repariert { background: #c6f6d5; color: #276749; }
+.chip.zusammengefuehrt { background: #e2e8f0; color: #4a5568; }
 
-    textarea {
-      height: auto;
-      min-height: 84px;
-      resize: vertical;
-      line-height: 1.4;
-    }
+/* Cockpit */
+.cockpit-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 0.85rem; margin-bottom: 0.6rem; background: #fff; font-size: 0.88rem; line-height: 1.45; }
+.cockpit-card .kopf { display: flex; justify-content: space-between; gap: 0.5rem; align-items: baseline; margin-bottom: 0.2rem; }
+.cockpit-card .typ { font-weight: 700; color: #1a202c; }
+.cockpit-card .meta { color: #718096; font-size: 0.78rem; overflow-wrap: anywhere; }
+.cockpit-card .kopf .meta { white-space: nowrap; flex: none; }
+.cockpit-card .details { color: #4a5568; }
+.cockpit-card .kommentar { margin-top: 0.4rem; }
+.cockpit-card .kommentar input { height: 40px; font-size: 0.9rem; }
+.cockpit-gruppe { margin: 1rem 0 0.4rem; font-weight: 700; color: #2b6cb0; font-size: 0.85rem; }
+.leer-hinweis { color: #718096; font-size: 0.9rem; padding: 0.5rem 0; }
 
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: #4299e1;
-      background: #fff;
-    }
+/* Reifen / Prüfpunkte (Dispo) */
+.reifen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.reifen-grid label { font-weight: 500; font-size: 0.8rem; }
+.reifen-grid input.warnung { border-color: #ed8936; background: #fffaf0; }
+.reifen-grid input.kritisch { border-color: #e53e3e; background: #fff5f5; }
+.reifen-hinweis { font-size: 0.78rem; color: #718096; margin-top: 0.4rem; }
+.reifen-hinweis .warn { color: #c05621; font-weight: 600; }
+.reifen-hinweis .kritisch { color: #9b2c2c; font-weight: 600; }
+.pruef-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.45rem 0; border-bottom: 1px solid #edf2f7; }
+.pruef-row:last-child { border-bottom: none; }
+.pruef-row .pruef-label { font-size: 0.9rem; color: #2d3748; flex: 1; margin: 0; font-weight: 500; }
+.pruef-row select { flex: none; width: 120px; height: 40px; padding: 0.35rem 0.6rem; font-size: 0.9rem; }
+.pruef-row select.ok { border-color: #48bb78; background-color: #f0fff4; color: #276749; }
+.pruef-row select.mangel { border-color: #e53e3e; background-color: #fff5f5; color: #9b2c2c; }
+select#ergebnis.e-gruen { border-color: #48bb78; background-color: #f0fff4; color: #276749; }
+select#ergebnis.e-gelb { border-color: #ed8936; background-color: #fffaf0; color: #7b341e; }
+select#ergebnis.e-rot { border-color: #e53e3e; background-color: #fff5f5; color: #9b2c2c; }
 
-    /* Versteckte Elemente (z. B. die Datei-Inputs) wirklich ausblenden –
-       sonst überschreibt die input-Regel oben das hidden-Attribut. */
-    [hidden] { display: none !important; }
+/* Sende-Overlay */
+.sende-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(26,32,44,0.72); display: none; align-items: center; justify-content: center; padding: 1.5rem; }
+.sende-overlay.aktiv { display: flex; }
+.sende-box { background: #fff; border-radius: 14px; padding: 1.75rem 1.5rem; max-width: 340px; width: 100%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+.sende-box .spinner { width: 46px; height: 46px; margin: 0 auto 1rem; border: 5px solid #e2e8f0; border-top-color: #2b6cb0; border-radius: 50%; animation: drehen 0.9s linear infinite; }
+@keyframes drehen { to { transform: rotate(360deg); } }
+.sende-box h3 { margin: 0 0 0.4rem; font-size: 1.1rem; color: #1a202c; }
+.sende-box p { margin: 0; font-size: 0.9rem; color: #4a5568; }
+.sende-box .sekunden { margin-top: 0.75rem; font-size: 0.8rem; color: #718096; }
 
-    /* Checkboxen wieder sichtbar machen (globales appearance:none aufheben) */
-    input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      -webkit-appearance: auto;
-      appearance: auto;
-      display: inline-block;
-      accent-color: #3182ce;
-    }
-
-    .fahrzeug-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .fahrzeug-row select {
-      width: 80px;
-      flex: none;
-    }
-
-    .fahrzeug-sep {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #2d3748;
-      white-space: nowrap;
-    }
-
-    .fahrzeug-row input[type="number"] {
-      width: 90px;
-      flex: none;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      overflow: hidden;
-    }
-
-    /* Foto-Felder */
-    .foto-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      width: 100%;
-      padding: 0.8rem;
-      border: 1.5px dashed #cbd5e0;
-      border-radius: 8px;
-      background: #f7fafc;
-      color: #4a5568;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .foto-btn:hover { border-color: #4299e1; background: #ebf8ff; }
-    .foto-btn.gesetzt { border-style: solid; border-color: #68d391; background: #f0fff4; color: #276749; }
-
-    .foto-preview {
-      display: none;
-      width: 100%;
-      margin-top: 0.6rem;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-    }
-    .foto-preview.sichtbar { display: block; }
-
-    /* Mehrfachauswahl-Dropdown */
-    .multiselect { position: relative; }
-    .ms-toggle {
-      width: 100%;
-      height: 48px;
-      padding: 0.65rem 0.9rem;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 8px;
-      background: #f7fafc;
-      font-size: 1rem;
-      color: #2d3748;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.5rem;
-      cursor: pointer;
-      text-align: left;
-    }
-    .ms-toggle:focus { outline: none; border-color: #4299e1; background: #fff; }
-    .ms-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .ms-label.placeholder { color: #a0aec0; }
-    .ms-caret { color: #718096; flex: none; transition: transform 0.2s; }
-    .ms-toggle[aria-expanded="true"] .ms-caret { transform: rotate(180deg); }
-
-    .ms-panel {
-      display: none;
-      position: absolute;
-      z-index: 20;
-      left: 0; right: 0;
-      margin-top: 0.3rem;
-      background: #fff;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 8px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-      max-height: 260px;
-      overflow-y: auto;
-      padding: 0.3rem;
-    }
-    .ms-panel.open { display: block; }
-    .ms-option {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 0.55rem 0.6rem;
-      margin: 0;
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: #2d3748;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .ms-option:hover { background: #f0f4f8; }
-
-    button[type="submit"] {
-      width: 100%;
-      padding: 0.8rem;
-      background: #3182ce;
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 0.5rem;
-      transition: background 0.2s, transform 0.1s;
-    }
-
-    button[type="submit"]:hover { background: #2b6cb0; }
-    button[type="submit"]:active { transform: scale(0.98); }
-    button[type="submit"]:disabled { background: #90cdf4; cursor: not-allowed; }
-
-    /* Arbeitsbeginn / Arbeitsende */
-    .art-switch {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
-    }
-    .art-switch input { position: absolute; opacity: 0; pointer-events: none; }
-    .art-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.15rem;
-      min-height: 64px;
-      margin: 0;
-      padding: 0.6rem;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 10px;
-      background: #f7fafc;
-      color: #4a5568;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
-      transition: border-color 0.2s, background 0.2s, color 0.2s;
-    }
-    .art-btn small { font-size: 0.75rem; font-weight: 500; color: #718096; }
-    .art-switch input:checked + .art-btn { border-color: #3182ce; background: #ebf8ff; color: #2b6cb0; }
-    .art-switch input:checked + .art-btn small { color: #2b6cb0; }
-    .art-switch input:focus-visible + .art-btn { outline: 2px solid #4299e1; outline-offset: 2px; }
-
-    .optional { font-weight: 500; color: #a0aec0; }
-
-    /* Vorgänger-Info */
-    .vorgaenger {
-      margin-top: 0.6rem;
-      padding: 0.7rem 0.85rem;
-      border-radius: 8px;
-      background: #f7fafc;
-      border: 1px solid #e2e8f0;
-      font-size: 0.85rem;
-      color: #4a5568;
-      line-height: 1.45;
-    }
-    .vorgaenger b { color: #1a202c; }
-    .vg-titel { display: block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #718096; }
-    .vg-name { display: block; font-size: 1.05rem; font-weight: 700; color: #1a202c; margin: 0.1rem 0 0.15rem; }
-    .vorgaenger a { color: #2b6cb0; font-weight: 600; }
-    .vorgaenger.warn { background: #fffaf0; border-color: #f6ad55; }
-
-    .hinweis {
-      margin-top: 0.6rem;
-      padding: 0.7rem 0.85rem;
-      border-radius: 8px;
-      background: #fff5f5;
-      border: 1px solid #feb2b2;
-      color: #9b2c2c;
-      font-size: 0.85rem;
-      line-height: 1.45;
-    }
-
-    .status {
-      margin-top: 1rem;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      text-align: center;
-      display: none;
-    }
-
-    .status.success { background: #c6f6d5; color: #276749; display: block; }
-    .status.error   { background: #fed7d7; color: #9b2c2c; display: block; }
-    .status.info    { background: #bee3f8; color: #2a4365; display: block; }
-  </style>
+/* Aktions-Menü (Marker antippen) */
+.menue-overlay { position: fixed; inset: 0; z-index: 9000; background: rgba(26,32,44,0.45); display: none; align-items: flex-end; justify-content: center; padding: 1rem; }
+.menue-overlay.aktiv { display: flex; }
+.menue { background: #fff; border-radius: 14px; width: 100%; max-width: 440px; padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+.menue h3 { font-size: 1rem; margin-bottom: 0.25rem; color: #1a202c; }
+.menue p { font-size: 0.85rem; color: #4a5568; margin-bottom: 0.75rem; }
+.menue .btn { width: 100%; margin-bottom: 0.45rem; min-height: 46px; }
+.menue input, .menue select, .menue textarea { margin-bottom: 0.6rem; }
+</style>
 </head>
 <body>
   <div class="card">
@@ -320,44 +186,66 @@
       <p>Bei Arbeitsbeginn und bei Arbeitsende ausfüllen</p>
     </div>
 
-    <form id="kontrollForm">
+    <form id="kontrollForm" novalidate>
       <div class="form-group">
         <label>Kontrolle bei</label>
-        <div class="art-switch" role="radiogroup">
+        <div class="switch gross" role="radiogroup">
           <input type="radio" name="kontrollart" id="artBeginn" value="Arbeitsbeginn" />
-          <label class="art-btn" for="artBeginn">▶ Arbeitsbeginn<small>Fahrzeug übernehmen</small></label>
+          <label class="switch-btn" for="artBeginn">▶ Arbeitsbeginn<small>Fahrzeug übernehmen</small></label>
           <input type="radio" name="kontrollart" id="artEnde" value="Arbeitsende" />
-          <label class="art-btn" for="artEnde">■ Arbeitsende<small>Fahrzeug abgeben</small></label>
+          <label class="switch-btn" for="artEnde">■ Arbeitsende<small>Fahrzeug abgeben</small></label>
         </div>
       </div>
 
       <div class="form-group">
         <label for="name">Name des Mitarbeiters</label>
-        <input type="text" id="name" placeholder="Vor- und Nachname" required />
+        <select id="name"><option value="">– Liste wird geladen –</option></select>
+        <input type="text" id="nameFrei" placeholder="Vor- und Nachname" hidden style="margin-top:0.5rem" />
       </div>
 
       <div class="form-group">
-        <label>Fahrzeug</label>
-        <div class="fahrzeug-row">
-          <select id="fahrzeug-prefix" required>
-            <option value="">--</option>
-            <option value="EU">EU</option>
-            <option value="SLE">SLE</option>
-          </select>
-          <span class="fahrzeug-sep">-VM</span>
-          <input type="number" id="fahrzeug-nummer" placeholder="312" min="1" inputmode="numeric" required style="width:90px;flex:none;" />
+        <label for="fahrzeug">Fahrzeug</label>
+        <select id="fahrzeug"><option value="">– Liste wird geladen –</option></select>
+        <div class="row" id="fahrzeugFrei" hidden style="margin-top:0.5rem">
+          <select id="fahrzeug-prefix"><option value="">--</option><option value="EU">EU</option><option value="SLE">SLE</option></select>
+          <input type="number" id="fahrzeug-nummer" placeholder="-VM Nummer, z. B. 312" min="1" inputmode="numeric" />
         </div>
-        <div class="vorgaenger" id="vorgaengerBox" hidden></div>
+        <div class="box" id="vorgaengerBox" hidden></div>
+      </div>
+
+      <!-- Bekannte Schäden + neue Schäden -->
+      <div class="form-group" id="schaedenGroup" hidden>
+        <label id="schaedenTitel">Bekannte Schäden</label>
+        <div class="skizze-wrap" id="skizzeWrap"><img id="skizzeBild" alt="Fahrzeugskizze" /></div>
+        <div class="skizze-hinweis" id="skizzeHinweis" hidden>Grau = bekannt · Orange = von Fahrern gemeldet, Dispo prüft noch</div>
+        <div class="marker-liste" id="bekannteListe"></div>
+        <label class="check-row" id="gesehenRow" hidden><input type="checkbox" id="gesehen" /> Bekannte Schäden gesehen</label>
+      </div>
+
+      <div class="form-group" id="neuGroup" hidden>
+        <label>Neue Schäden am Fahrzeug?</label>
+        <div class="switch" role="radiogroup">
+          <input type="radio" name="neuSchaden" id="neuNein" value="Nein" />
+          <label class="switch-btn" for="neuNein">Nein</label>
+          <input type="radio" name="neuSchaden" id="neuJa" value="Ja" />
+          <label class="switch-btn" for="neuJa">Ja, melden</label>
+        </div>
+        <div id="neuBereich" hidden>
+          <div class="box warn" id="neuHinweis" style="margin-top:0.6rem"></div>
+          <div class="marker-liste" id="neueListe"></div>
+          <div class="btn-row"><button type="button" class="btn" id="btnNeuOhnePosition">+ Schaden ohne Position in der Skizze</button></div>
+        </div>
       </div>
 
       <div class="form-group">
-        <label for="datum">Datum</label>
-        <input type="date" id="datum" required />
+        <label>Datum</label>
+        <div class="statisch" id="datumAnzeige"></div>
       </div>
 
       <div class="form-group">
         <label for="kilometerstand">Kilometerstand</label>
-        <input type="number" id="kilometerstand" placeholder="z. B. 84500" min="0" inputmode="numeric" required />
+        <input type="number" id="kilometerstand" placeholder="z. B. 84500" min="0" inputmode="numeric" />
+        <div class="box" id="kmBox" hidden></div>
       </div>
 
       <div class="form-group">
@@ -366,35 +254,18 @@
         <input type="file" id="fotoVorne" accept="image/*" capture="environment" hidden />
         <img class="foto-preview" id="previewVorne" alt="Vorschau vorne" />
       </div>
-
       <div class="form-group">
         <label>Foto hinten <span class="optional" data-optional-ende hidden>(optional)</span></label>
         <label class="foto-btn" id="btnHinten" for="fotoHinten">📷 Foto aufnehmen / wählen</label>
         <input type="file" id="fotoHinten" accept="image/*" capture="environment" hidden />
         <img class="foto-preview" id="previewHinten" alt="Vorschau hinten" />
       </div>
-
-      <div class="form-group">
-        <label for="schaeden">Schäden am Fahrzeug?</label>
-        <select id="schaeden" required>
-          <option value="">– bitte wählen –</option>
-          <option value="Nein">Nein</option>
-          <option value="Ja">Ja</option>
-        </select>
-      </div>
-
-      <div class="form-group" id="schadenBox" style="display:none;">
-        <label for="schadenText">Schadensbeschreibung</label>
-        <textarea id="schadenText" placeholder="Welcher Schaden? Wo am Fahrzeug?"></textarea>
-      </div>
-
       <div class="form-group">
         <label>Foto Innenraum vorne</label>
         <label class="foto-btn" id="btnInnenVorne" for="fotoInnenVorne">📷 Foto aufnehmen / wählen</label>
         <input type="file" id="fotoInnenVorne" accept="image/*" capture="environment" hidden />
         <img class="foto-preview" id="previewInnenVorne" alt="Vorschau Innenraum vorne" />
       </div>
-
       <div class="form-group">
         <label>Foto Innenraum hinten</label>
         <label class="foto-btn" id="btnInnenHinten" for="fotoInnenHinten">📷 Foto aufnehmen / wählen</label>
@@ -406,8 +277,7 @@
         <label>Meldungen / Warnleuchten</label>
         <div class="multiselect" id="msWarn">
           <button type="button" class="ms-toggle" id="msToggle" aria-expanded="false">
-            <span class="ms-label placeholder" id="msLabel">Keine ausgewählt</span>
-            <span class="ms-caret">▾</span>
+            <span class="ms-label placeholder" id="msLabel">Keine ausgewählt</span><span class="ms-caret">▾</span>
           </button>
           <div class="ms-panel" id="msPanel"></div>
         </div>
@@ -423,329 +293,823 @@
     </form>
   </div>
 
+  <div class="sende-overlay" id="sendeOverlay" role="alertdialog" aria-live="assertive">
+    <div class="sende-box">
+      <div class="spinner"></div>
+      <h3>Wird gespeichert …</h3>
+      <p>Bitte warten und die App nicht schließen.<br>Bei schlechtem Netz kann das bis zu 1 Minute dauern.</p>
+      <div class="sekunden"></div>
+    </div>
+  </div>
+
+  <script>// ============================================================
+//  Fuhrpark – gemeinsame Regeln (v4)
+//  Wird 1:1 in das Apps-Script-Backend UND in beide Web-Apps
+//  eingebaut (build.py). Deshalb: nur reine Funktionen, kein DOM,
+//  keine Google-Dienste, kein modernes Syntax-Zucker über ES2017.
+// ============================================================
+
+var FP_GRENZEN = {
+  KM_MAX_PRO_TAG: 500,   // mehr km pro Tag seit der letzten Kontrolle = auffällig
+  KM_LUECKE: 20,         // Differenz Arbeitsende -> nächster Arbeitsbeginn = "ohne Kontrolle bewegt"
+  X10_MIN: 8.5,          // Faktor-Bereich, der nach "Ziffer zu viel/zu wenig" aussieht
+  X10_MAX: 11.5,
+  HISTORIE_FENSTER: 8,   // so viele letzte Stände bilden die Referenz
+  AUSREISSER_FAKTOR: 1.5 // Stände außerhalb median/1.5 .. median*1.5 zählen nicht als Referenz
+};
+
+// "eu vm 220", "EU-VM 220", " EU-VM220 " -> "EUVM220"
+function fpNormKennzeichen(s) {
+  return String(s == null ? "" : s).toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+// Anzeigeform vereinheitlichen: "EU VM 220" / "eu-vm220" -> "EU-VM 220"
+function fpKennzeichenAnzeige(s) {
+  var m = /^([A-ZÄÖÜ]+)\s*-?\s*([A-ZÄÖÜ]+)\s*-?\s*(\d+)\s*([A-Z]?)$/i.exec(String(s == null ? "" : s).trim());
+  if (!m) return String(s == null ? "" : s).trim().replace(/\s+/g, " ");
+  return (m[1] + "-" + m[2] + " " + m[3] + (m[4] || "")).toUpperCase();
+}
+
+// Namen vergleichbar machen: "  Rudolf  Rätz " -> "rudolf raetz"
+function fpNormName(s) {
+  var t = String(s == null ? "" : s).toLowerCase().trim().replace(/\s+/g, " ");
+  t = t.replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss");
+  if (typeof t.normalize === "function") t = t.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return t;
+}
+
+// Zwei Namen "gleich genug"? exakt (normalisiert), über Alias-Liste,
+// oder gleicher Nachname + gleicher Anfangsbuchstabe des Vornamens ("Rudi Rätz" ~ "Rudolf Rätz").
+function fpNamenGleich(a, b, aliasse) {
+  var na = fpNormName(a), nb = fpNormName(b);
+  if (!na || !nb) return false;
+  if (na === nb) return true;
+  if (aliasse) {
+    var ka = aliasse[na] || na, kb = aliasse[nb] || nb;
+    if (ka === kb) return true;
+  }
+  var ta = na.split(" "), tb = nb.split(" ");
+  if (ta.length >= 2 && tb.length >= 2) {
+    return ta[ta.length - 1] === tb[tb.length - 1] && ta[0].charAt(0) === tb[0].charAt(0);
+  }
+  // Nur ein Wort auf einer Seite: muss als Vor- oder Nachname vorkommen
+  if (ta.length === 1 || tb.length === 1) {
+    var one = ta.length === 1 ? ta[0] : tb[0], many = ta.length === 1 ? tb : ta;
+    return one.length >= 4 && many.indexOf(one) !== -1;
+  }
+  return false;
+}
+
+// Letzter plausibler km-Stand aus der Historie.
+// historie: [{ km, zeitMs, quelle, art, name }] – Reihenfolge egal.
+// Der Median der letzten Stände bestimmt das "normale" Niveau; Ausreißer (Ziffer zu viel/zu wenig,
+// ein einzelner falscher Altwert) fallen heraus. Bewusst OHNE Auffälligkeits-Flag: ein früher
+// falscher Wert darf nicht alle späteren richtigen Werte dauerhaft als "auffällig" blockieren.
+// Rückgabe: { km, zeitMs, quelle, art, name } oder null.
+function fpPlausiblerStand(historie) {
+  var liste = (historie || []).filter(function (h) {
+    return h && isFinite(Number(h.km)) && Number(h.km) > 0;
+  }).map(function (h) {
+    return { km: Number(h.km), zeitMs: Number(h.zeitMs) || 0, quelle: h.quelle || "", art: h.art || "", name: h.name || "" };
+  }).sort(function (a, b) { return a.zeitMs - b.zeitMs; });
+  if (!liste.length) return null;
+  var fenster = liste.slice(-FP_GRENZEN.HISTORIE_FENSTER);
+  if (fenster.length < 3) return fenster[fenster.length - 1];
+  var sortiert = fenster.map(function (h) { return h.km; }).sort(function (a, b) { return a - b; });
+  var median = sortiert.length % 2
+    ? sortiert[(sortiert.length - 1) / 2]
+    : (sortiert[sortiert.length / 2 - 1] + sortiert[sortiert.length / 2]) / 2;
+  var unten = median / FP_GRENZEN.AUSREISSER_FAKTOR, oben = median * FP_GRENZEN.AUSREISSER_FAKTOR;
+  for (var i = fenster.length - 1; i >= 0; i--) {
+    if (fenster[i].km >= unten && fenster[i].km <= oben) return fenster[i];
+  }
+  return fenster[fenster.length - 1];
+}
+
+// Eingegebenen km-Stand gegen die Referenz prüfen.
+// Rückgabe: { ok, typ: null|"ungueltig"|"x10"|"rueckwaerts"|"sprung", text, referenz }
+function fpKmPruefen(km, referenz, jetztMs, grenzen) {
+  var g = grenzen || FP_GRENZEN;
+  var wert = Number(km);
+  if (!isFinite(wert) || wert <= 0) {
+    return { ok: false, typ: "ungueltig", text: "Bitte einen gültigen Kilometerstand eingeben.", referenz: referenz || null };
+  }
+  if (!referenz || !isFinite(Number(referenz.km)) || Number(referenz.km) <= 0) {
+    return { ok: true, typ: null, text: "", referenz: null };
+  }
+  var ref = Number(referenz.km);
+  var faktor = wert / ref;
+  var fmt = fpKmFormat;
+  if (faktor >= g.X10_MIN && faktor <= g.X10_MAX) {
+    return { ok: false, typ: "x10", text: "Sieht nach einer Ziffer zu viel aus: " + fmt(wert) + " km, zuletzt " + fmt(ref) + " km.", referenz: referenz };
+  }
+  if (faktor >= 1 / g.X10_MAX && faktor <= 1 / g.X10_MIN) {
+    return { ok: false, typ: "x10", text: "Sieht nach einer Ziffer zu wenig aus: " + fmt(wert) + " km, zuletzt " + fmt(ref) + " km.", referenz: referenz };
+  }
+  if (wert < ref) {
+    return { ok: false, typ: "rueckwaerts", text: "Kleiner als der letzte Stand (" + fmt(ref) + " km).", referenz: referenz };
+  }
+  var tage = Math.max(1, ((Number(jetztMs) || Date.now()) - (Number(referenz.zeitMs) || 0)) / 86400000);
+  var erlaubt = g.KM_MAX_PRO_TAG * tage;
+  if (wert - ref > erlaubt) {
+    return {
+      ok: false, typ: "sprung",
+      text: fmt(wert - ref) + " km seit der letzten Kontrolle (" + fmt(ref) + " km, " + (tage < 1.5 ? "heute/gestern" : "vor " + Math.round(tage) + " Tagen") + ") – mehr als " + fmt(Math.round(erlaubt)) + " km.",
+      referenz: referenz
+    };
+  }
+  return { ok: true, typ: null, text: "", referenz: referenz };
+}
+
+// Lücke / fehlende Kontrolle zwischen der letzten Kontrolle dieses Fahrzeugs und der jetzigen.
+// vorher: { art, km, kmPlausibel (false = km war auffällig), name, zeitMs, datum "yyyy-mm-dd" }
+// jetzt:  { art, km, name, datum }
+// Rückgabe: Liste von { typ, text }
+function fpLueckePruefen(vorher, jetzt, grenzen) {
+  var g = grenzen || FP_GRENZEN;
+  var out = [];
+  if (!vorher || !jetzt) return out;
+  var gleicherTag = vorher.datum && jetzt.datum && vorher.datum === jetzt.datum;
+  var gleichePerson = fpNamenGleich(vorher.name, jetzt.name);
+  if (vorher.art === "Arbeitsende" && jetzt.art === "Arbeitsbeginn") {
+    var kmA = Number(vorher.km), kmB = Number(jetzt.km);
+    if (vorher.kmPlausibel !== false && isFinite(kmA) && isFinite(kmB) && Math.abs(kmB - kmA) > g.KM_LUECKE) {
+      out.push({
+        typ: "Fahrt ohne Kontrolle",
+        text: fpKmFormat(Math.abs(kmB - kmA)) + " km zwischen Arbeitsende (" + (vorher.name || "?") + ", " + fpKmFormat(kmA) + " km) und diesem Arbeitsbeginn (" + (jetzt.name || "?") + ", " + fpKmFormat(kmB) + " km)."
+      });
+    }
+  }
+  if (vorher.art === "Arbeitsbeginn" && jetzt.art === "Arbeitsbeginn" && !(gleicherTag && gleichePerson)) {
+    out.push({ typ: "Kontrolle fehlt", text: "Arbeitsende fehlt: " + (vorher.name || "?") + " hat am " + fpDatumAnzeige(vorher.datum) + " nur Arbeitsbeginn erfasst.", fahrer: vorher.name, datum: vorher.datum });
+  }
+  if (vorher.art === "Arbeitsende" && jetzt.art === "Arbeitsende" && !(gleicherTag && gleichePerson)) {
+    out.push({ typ: "Kontrolle fehlt", text: "Arbeitsbeginn fehlt: " + (jetzt.name || "?") + " hat am " + fpDatumAnzeige(jetzt.datum) + " nur Arbeitsende erfasst.", fahrer: jetzt.name, datum: jetzt.datum });
+  }
+  return out;
+}
+
+function fpKmFormat(n) {
+  var s = String(Math.round(Number(n) || 0));
+  return s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+// "2026-10-17" -> "17.10.2026"
+function fpDatumAnzeige(iso) {
+  var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ""));
+  return m ? m[3] + "." + m[2] + "." + m[1] : String(iso || "");
+}
+
+// Stammdaten-Kategorie -> Skizzenbild
+function fpSkizzeFuerKategorie(kategorie) {
+  var k = String(kategorie || "").toUpperCase();
+  if (k.indexOf("BTW") === 0) return "citan";
+  if (k.indexOf("LMW") === 0 || k.indexOf("TSW") === 0) return "sprinter";
+  if (k.indexOf("BUS") === 0) return "bus";
+  return "";
+}
+
+// Lesbares Label der Skizzenkategorie (wie in der bisherigen Dispo-App)
+function fpKategorieLabel(kategorie) {
+  var k = String(kategorie || "").toUpperCase();
+  if (k.indexOf("BTW") === 0) return "BTW – Citan / Caddy / Berlingo";
+  if (k.indexOf("LMW") === 0) return "LMW – Sprinter / Crafter";
+  if (k.indexOf("TSW") === 0) return "TSW – Sprinter / Crafter";
+  if (k.indexOf("BUS") === 0) return "Bus – Transporter 9-Sitzer";
+  return "";
+}
+
+// Node-Tests
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { FP_GRENZEN: FP_GRENZEN, fpNormKennzeichen: fpNormKennzeichen, fpKennzeichenAnzeige: fpKennzeichenAnzeige, fpNormName: fpNormName, fpNamenGleich: fpNamenGleich, fpPlausiblerStand: fpPlausiblerStand, fpKmPruefen: fpKmPruefen, fpLueckePruefen: fpLueckePruefen, fpKmFormat: fpKmFormat, fpDatumAnzeige: fpDatumAnzeige, fpSkizzeFuerKategorie: fpSkizzeFuerKategorie, fpKategorieLabel: fpKategorieLabel };
+}
+</script>
+  <script>// Fuhrpark-Apps v4 – gemeinsame Bausteine (Fahrer-App + Dispo-App). Erwartet regeln.js davor.
+var FP = (function () {
+  var SKIZZEN_PFAD = "skizzen/";
+  var api = { url: "" };
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
+  }
+  function uid() { return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8); }
+  function heuteIso() {
+    var d = new Date();
+    return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+  }
+  function datumLang(d) {
+    d = d || new Date();
+    return d.toLocaleDateString("de-DE", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
+  }
+  function speicher(key, wert) { try { if (wert === undefined) return localStorage.getItem(key); localStorage.setItem(key, wert); } catch (e) { return null; } }
+
+  // ---------- Backend ----------
+  function get(params, timeoutMs) {
+    var q = Object.keys(params).map(function (k) { return encodeURIComponent(k) + "=" + encodeURIComponent(params[k]); }).join("&");
+    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, timeoutMs || 25000) : null;
+    return fetch(api.url + (api.url.indexOf("?") === -1 ? "?" : "&") + q, ctrl ? { signal: ctrl.signal } : {})
+      .then(function (r) { return r.json(); })
+      .then(function (j) { clearTimeout(timer); return j; }, function (e) { clearTimeout(timer); throw e; });
+  }
+  function post(body, timeoutMs) {
+    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, timeoutMs || 90000) : null;
+    // Ohne Content-Type-Header -> "simple request", keine CORS-Preflight (Apps Script)
+    return fetch(api.url, { method: "POST", body: JSON.stringify(body), signal: ctrl ? ctrl.signal : undefined })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { clearTimeout(timer); return j; }, function (e) { clearTimeout(timer); throw e; });
+  }
+
+  // Stammdaten (Fahrzeuge + Fahrer): aus localStorage sofort, im Hintergrund frisch vom Backend
+  function stammdaten(cb) {
+    var alt = null;
+    try { alt = JSON.parse(speicher("fp_stamm_v4") || "null"); } catch (e) {}
+    var frisch = alt && alt._gespeichert && Date.now() - alt._gespeichert < 6 * 3600000;
+    if (alt && alt.fahrzeuge) cb(alt, "cache");
+    if (frisch) return;
+    get({ action: "stammdaten" }, 20000).then(function (j) {
+      if (j && j.status === "ok" && j.fahrzeuge) {
+        j._gespeichert = Date.now();
+        speicher("fp_stamm_v4", JSON.stringify(j));
+        cb(j, "backend");
+      } else if (!alt) cb(null, "fehler");
+    }).catch(function () { if (!alt) cb(null, "fehler"); });
+  }
+
+  // <select> mit Fahrzeugen füllen (Gruppen je Kategorie, Verliehene ans Ende)
+  function fuelleFahrzeugSelect(sel, fahrzeuge, opts) {
+    opts = opts || {};
+    var wert = sel.value;
+    sel.innerHTML = '<option value="">– Fahrzeug wählen –</option>';
+    var gruppen = {};
+    (fahrzeuge || []).forEach(function (f) {
+      var g = f.verliehen ? "Verliehen" : (String(f.kategorie || "Sonstige").toUpperCase().split(/\s|–|-/)[0] || "Sonstige");
+      (gruppen[g] = gruppen[g] || []).push(f);
+    });
+    Object.keys(gruppen).sort(function (a, b) { return a === "Verliehen" ? 1 : b === "Verliehen" ? -1 : a.localeCompare(b); }).forEach(function (g) {
+      if (g === "Verliehen" && opts.ohneVerliehen) return;
+      var og = document.createElement("optgroup"); og.label = g;
+      gruppen[g].sort(function (a, b) { return a.kennzeichen.localeCompare(b.kennzeichen); }).forEach(function (f) {
+        var o = document.createElement("option");
+        o.value = f.kennzeichen; o.textContent = f.kennzeichen + (f.name ? " · " + f.name : "");
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    });
+    if (wert) sel.value = wert;
+  }
+  function fuelleFahrerSelect(sel, fahrer, mitAndere) {
+    var wert = sel.value;
+    sel.innerHTML = '<option value="">– Name wählen –</option>';
+    (fahrer || []).forEach(function (f) {
+      var o = document.createElement("option"); o.value = f.name; o.textContent = f.name; sel.appendChild(o);
+    });
+    if (mitAndere !== false) { var a = document.createElement("option"); a.value = "__andere__"; a.textContent = "Mein Name fehlt …"; sel.appendChild(a); }
+    if (wert) sel.value = wert;
+  }
+  function fahrzeugAusListe(fahrzeuge, kennzeichen) {
+    var key = fpNormKennzeichen(kennzeichen);
+    for (var i = 0; i < (fahrzeuge || []).length; i++) if (fpNormKennzeichen(fahrzeuge[i].kennzeichen) === key) return fahrzeuge[i];
+    return null;
+  }
+
+  // ---------- Fotos ----------
+  function verkleinereBild(file, maxKante, qualitaet) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var img = new Image();
+        img.onload = function () {
+          var w = img.width, h = img.height, f = Math.min(1, maxKante / Math.max(w, h));
+          w = Math.round(w * f); h = Math.round(h * f);
+          var canvas = document.createElement("canvas"); canvas.width = w; canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", qualitaet));
+        };
+        img.onerror = reject; img.src = reader.result;
+      };
+      reader.onerror = reject; reader.readAsDataURL(file);
+    });
+  }
+  // Foto-Button verdrahten; setter(dataUrl) bekommt das komprimierte Bild
+  function fotoFeld(input, btn, preview, setter, maxKante, qualitaet) {
+    var standard = btn.textContent;
+    input.addEventListener("change", function () {
+      var file = input.files[0]; if (!file) return;
+      btn.textContent = "⏳ Foto wird verarbeitet…";
+      verkleinereBild(file, maxKante || 1600, qualitaet || 0.7).then(function (dataUrl) {
+        setter(dataUrl);
+        if (preview) { preview.src = dataUrl; preview.classList.add("sichtbar"); }
+        btn.textContent = "✓ Foto gesetzt — neu aufnehmen"; btn.classList.add("gesetzt");
+      }).catch(function () {
+        btn.textContent = standard; alert("Das Bild konnte nicht verarbeitet werden. Bitte erneut versuchen.");
+      });
+    });
+    return { reset: function () { input.value = ""; btn.textContent = standard; btn.classList.remove("gesetzt"); if (preview) { preview.removeAttribute("src"); preview.classList.remove("sichtbar"); } } };
+  }
+
+  // ---------- Skizze mit Markern ----------
+  // wrap: <div class="skizze-wrap"><img></div>. Marker: { id?, x, y, text, status?, ... }
+  // opts: { interaktiv: fn()->bool, onNeu(x,y), onMarkerTap(marker, index, istNeu) }
+  function Skizze(wrap, opts) {
+    opts = opts || {};
+    var img = wrap.querySelector("img");
+    var st = { alt: [], neu: [], aktiv: null, bild: "" };
+    function setBild(name) {
+      st.bild = name || "";
+      if (!name) { img.removeAttribute("src"); wrap.classList.remove("sichtbar"); return; }
+      img.src = /\//.test(name) ? name : SKIZZEN_PFAD + name + ".jpg";
+      wrap.classList.add("sichtbar");
+    }
+    function klasse(m, istNeu) { return istNeu ? "neu" : (String(m.status || "").toLowerCase() === "offen" ? "gemeldet" : "alt"); }
+    function zeichne() {
+      Array.prototype.slice.call(wrap.querySelectorAll(".skizze-marker")).forEach(function (m) { m.remove(); });
+      var alle = st.alt.map(function (m) { return { m: m, neu: false }; }).concat(st.neu.map(function (m) { return { m: m, neu: true }; }));
+      alle.forEach(function (e, i) {
+        if (typeof e.m.x !== "number" || typeof e.m.y !== "number") return;
+        var p = document.createElement("div");
+        p.className = "skizze-marker " + klasse(e.m, e.neu) + (st.aktiv === i ? " aktiv" : "");
+        p.style.left = e.m.x * 100 + "%"; p.style.top = e.m.y * 100 + "%";
+        p.textContent = i + 1;
+        p.title = e.neu ? "Neuer Schaden" : (e.m.text || "Bekannter Schaden");
+        p.addEventListener("click", function (ev) {
+          ev.stopPropagation();
+          st.aktiv = st.aktiv === i ? null : i; zeichne();
+          if (opts.onMarkerTap) opts.onMarkerTap(e.m, e.neu ? i - st.alt.length : i, e.neu);
+        });
+        wrap.appendChild(p);
+      });
+      wrap.classList.toggle("interaktiv", !!(opts.interaktiv && opts.interaktiv()));
+    }
+    wrap.addEventListener("click", function (e) {
+      if (!(opts.interaktiv && opts.interaktiv())) return;
+      if (e.target.classList.contains("skizze-marker")) return;
+      var rect = wrap.getBoundingClientRect();
+      var x = (e.clientX - rect.left) / rect.width, y = (e.clientY - rect.top) / rect.height;
+      if (x < 0 || x > 1 || y < 0 || y > 1) return;
+      if (opts.onNeu) opts.onNeu(Math.round(x * 10000) / 10000, Math.round(y * 10000) / 10000);
+    });
+    function setMarker(alt, neu) { st.alt = alt || []; st.neu = neu || []; st.aktiv = null; zeichne(); }
+    // Skizze + Marker als JPG (Dispo: Versand als "Foto Skizze")
+    function alsBild() {
+      var alle = st.alt.concat(st.neu);
+      if (!alle.length || !img.src || !img.naturalWidth) return null;
+      var w = img.naturalWidth, h = img.naturalHeight;
+      var canvas = document.createElement("canvas"); canvas.width = w; canvas.height = h;
+      var ctx = canvas.getContext("2d");
+      try { ctx.drawImage(img, 0, 0, w, h); } catch (e) { return null; }
+      var r = Math.max(12, Math.round(w * 0.018));
+      alle.forEach(function (m, i) {
+        if (typeof m.x !== "number") return;
+        var istNeu = i >= st.alt.length;
+        ctx.beginPath(); ctx.arc(m.x * w, m.y * h, r, 0, Math.PI * 2);
+        ctx.fillStyle = istNeu ? "#e53e3e" : (String(m.status || "").toLowerCase() === "offen" ? "#dd6b20" : "#718096");
+        ctx.fill(); ctx.lineWidth = Math.max(2, r * 0.15); ctx.strokeStyle = "#fff"; ctx.stroke();
+        ctx.fillStyle = "#fff"; ctx.font = "bold " + Math.round(r * 1.1) + "px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(String(i + 1), m.x * w, m.y * h);
+      });
+      try { return canvas.toDataURL("image/jpeg", 0.7); } catch (e) { return null; }
+    }
+    return { setBild: setBild, setMarker: setMarker, zeichne: zeichne, alsBild: alsBild, zustand: st, img: img, setAktiv: function (i) { st.aktiv = i; zeichne(); } };
+  }
+
+  // ---------- km-Prüfung (live, mit Bestätigung + Pflicht-Begründung) ----------
+  // feld: <input>, box: <div>, referenzFn: () -> {km, zeitMs, name, quelle} | null
+  function kmPruefer(feld, box, referenzFn) {
+    var st = { ergebnis: null, bestaetigt: false, begruendung: "" };
+    function refText(ref) {
+      if (!ref) return "";
+      var wann = ref.zeitMs ? new Date(ref.zeitMs).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : "";
+      return "Letzter plausibler Stand: <b>" + fpKmFormat(ref.km) + " km</b>" + (wann ? " (" + wann + (ref.name ? ", " + esc(ref.name) : "") + ")" : "");
+    }
+    function zeige() {
+      var e = st.ergebnis;
+      if (!feld.value) { box.hidden = true; return; }
+      if (!e || e.ok) {
+        var ref = referenzFn();
+        if (ref) { box.hidden = false; box.className = "box ok"; box.innerHTML = "✓ Kilometerstand plausibel. " + refText(ref); }
+        else box.hidden = true;
+        return;
+      }
+      box.hidden = false; box.className = "box fehler";
+      var html = '<span class="box-titel">Bitte prüfen</span>⚠️ ' + esc(e.text) + (e.referenz ? "<br>" + refText(e.referenz) : "");
+      if (e.typ === "ungueltig") { box.innerHTML = html; return; }
+      html += '<div class="btn-row"><button type="button" class="btn primary" data-km="korrigieren">Korrigieren</button>' +
+              '<button type="button" class="btn' + (st.bestaetigt ? " ok" : "") + '" data-km="stimmt">Stimmt so</button></div>';
+      if (st.bestaetigt) {
+        html += '<label for="kmBegruendung" style="margin-top:0.6rem">Warum stimmt der Wert? (Pflicht)</label>' +
+                '<textarea id="kmBegruendung" placeholder="z. B. Tacho getauscht, Fahrzeug war in der Werkstatt, vorheriger Eintrag war falsch …">' + esc(st.begruendung) + "</textarea>";
+      }
+      box.innerHTML = html;
+      box.querySelector('[data-km="korrigieren"]').addEventListener("click", function () { st.bestaetigt = false; feld.focus(); feld.select && feld.select(); });
+      box.querySelector('[data-km="stimmt"]').addEventListener("click", function () { st.bestaetigt = true; zeige(); var t = box.querySelector("textarea"); if (t) t.focus(); });
+      var ta = box.querySelector("textarea");
+      if (ta) ta.addEventListener("input", function () { st.begruendung = ta.value; });
+    }
+    function pruefe() {
+      var vorher = st.ergebnis ? st.ergebnis.typ + "|" + st.ergebnis.text : "";
+      st.ergebnis = feld.value ? fpKmPruefen(feld.value, referenzFn(), Date.now()) : null;
+      var jetzt = st.ergebnis ? st.ergebnis.typ + "|" + st.ergebnis.text : "";
+      if (jetzt !== vorher) { st.bestaetigt = false; }
+      zeige();
+      return st.ergebnis;
+    }
+    feld.addEventListener("input", pruefe);
+    feld.addEventListener("change", pruefe);
+    return {
+      pruefe: pruefe,
+      reset: function () { st.ergebnis = null; st.bestaetigt = false; st.begruendung = ""; box.hidden = true; },
+      // null = alles ok, sonst Fehlertext fürs Formular
+      validiere: function () {
+        var e = st.ergebnis || pruefe();
+        if (!feld.value) return "Bitte den Kilometerstand eingeben.";
+        if (!e || e.ok) return null;
+        if (e.typ === "ungueltig") return e.text;
+        if (!st.bestaetigt) return "Bitte den Kilometerstand korrigieren oder mit „Stimmt so“ bestätigen.";
+        if (!st.begruendung.trim()) return "Bitte kurz begründen, warum der Kilometerstand stimmt.";
+        return null;
+      },
+      daten: function () {
+        var e = st.ergebnis;
+        return { ok: !e || !!e.ok, typ: e ? e.typ : null, text: e ? e.text : "", referenzKm: e && e.referenz ? e.referenz.km : null, bestaetigt: st.bestaetigt, begruendung: st.begruendung.trim() };
+      }
+    };
+  }
+
+  // ---------- Sende-Overlay ----------
+  var sendeUhr = null;
+  function overlay(an, titel) {
+    var ov = document.getElementById("sendeOverlay"); if (!ov) return;
+    var sek = ov.querySelector(".sekunden");
+    clearInterval(sendeUhr);
+    if (an) {
+      if (titel) ov.querySelector("h3").textContent = titel;
+      var start = Date.now(); if (sek) sek.textContent = "";
+      sendeUhr = setInterval(function () { if (sek) sek.textContent = Math.round((Date.now() - start) / 1000) + " s"; }, 1000);
+      ov.classList.add("aktiv");
+    } else ov.classList.remove("aktiv");
+  }
+
+  // ---------- Aktionsmenü (unten eingeblendet) ----------
+  // aktionen: [{ label, klasse, wert }]; felder: html-String (optional); cb(wert, menueEl)
+  function menue(titel, text, aktionen, felder, cb) {
+    var ov = document.getElementById("menueOverlay");
+    if (!ov) { ov = document.createElement("div"); ov.id = "menueOverlay"; ov.className = "menue-overlay"; document.body.appendChild(ov); }
+    ov.innerHTML = '<div class="menue"><h3>' + esc(titel) + "</h3>" + (text ? "<p>" + text + "</p>" : "") + (felder || "") +
+      aktionen.map(function (a) { return '<button type="button" class="btn ' + (a.klasse || "") + '" data-wert="' + esc(a.wert) + '">' + esc(a.label) + "</button>"; }).join("") +
+      '<button type="button" class="btn" data-wert="">Abbrechen</button></div>';
+    ov.classList.add("aktiv");
+    ov.onclick = function (e) {
+      var b = e.target.closest("button[data-wert]");
+      if (!b && e.target !== ov) return;
+      var wert = b ? b.getAttribute("data-wert") : "";
+      if (wert && cb && cb(wert, ov.querySelector(".menue")) === false) return; // false = Menü offen lassen (Validierung)
+      ov.classList.remove("aktiv"); ov.innerHTML = "";
+      if (!wert && cb) cb("", null);
+    };
+  }
+
+  // Mehrfachauswahl (Warnleuchten)
+  function multiselect(toggle, panel, label, optionen) {
+    optionen.forEach(function (opt) {
+      var lbl = document.createElement("label"); lbl.className = "ms-option";
+      var cb = document.createElement("input"); cb.type = "checkbox"; cb.value = opt;
+      cb.addEventListener("change", aktualisiere);
+      lbl.appendChild(cb); lbl.appendChild(document.createTextNode(opt)); panel.appendChild(lbl);
+    });
+    function werte() { return Array.prototype.map.call(panel.querySelectorAll("input:checked"), function (c) { return c.value; }); }
+    function aktualisiere() {
+      var sel = werte();
+      label.textContent = sel.length === 0 ? "Keine ausgewählt" : sel.length === 1 ? sel[0] : sel.length + " ausgewählt";
+      label.classList.toggle("placeholder", sel.length === 0);
+    }
+    toggle.addEventListener("click", function () { var offen = panel.classList.toggle("open"); toggle.setAttribute("aria-expanded", offen ? "true" : "false"); });
+    document.addEventListener("click", function (e) { if (!toggle.parentNode.contains(e.target)) { panel.classList.remove("open"); toggle.setAttribute("aria-expanded", "false"); } });
+    return { werte: werte, reset: function () { panel.querySelectorAll("input:checked").forEach(function (c) { c.checked = false; }); aktualisiere(); } };
+  }
+
+  // Schaden-Status lesbar: der Zustand steht immer klar dran (nicht repariert / repariert)
+  function statusInfo(status) {
+    var s = String(status || "").toLowerCase();
+    if (s === "offen") return { label: "gemeldet · ungeprüft", klasse: "offen" };
+    if (s === "bestätigt") return { label: "nicht repariert", klasse: "nichtrepariert" };
+    if (s === "repariert") return { label: "repariert", klasse: "repariert" };
+    if (s === "zusammengeführt") return { label: "zusammengeführt", klasse: "zusammengefuehrt" };
+    return { label: status || "", klasse: "" };
+  }
+  function statusChip(status) {
+    var i = statusInfo(status);
+    return i.label ? '<span class="chip ' + i.klasse + '">' + esc(i.label) + "</span>" : "";
+  }
+
+  // Bekannte-Schäden-Liste rendern (Fahrer + Dispo)
+  function schadenZeile(m, nr, klasse, extraHtml) {
+    var meta = [];
+    if (m.am) meta.push("seit " + esc(m.am));
+    if (m.von) meta.push("gemeldet von " + esc(m.von));
+    if (m.quelle) meta.push(esc(m.quelle));
+    return '<div class="marker-zeile ' + klasse + '" data-id="' + esc(m.id || "") + '"><span class="marker-nr ' + klasse + '">' + nr + "</span>" +
+      '<div class="marker-inhalt">' + (m.status ? statusChip(m.status) + " " : "") +
+      esc(m.text || m.beschreibung || "(ohne Beschreibung)") +
+      (typeof m.x !== "number" ? ' <small style="display:inline">· ohne Position</small>' : "") +
+      (meta.length ? "<small>" + meta.join(" · ") + "</small>" : "") +
+      (m.foto ? '<small><a href="' + esc(m.foto) + '" target="_blank" rel="noopener">📷 Foto ansehen</a></small>' : "") +
+      (extraHtml || "") + "</div></div>";
+  }
+
+  return { api: api, esc: esc, uid: uid, heuteIso: heuteIso, datumLang: datumLang, speicher: speicher, get: get, post: post, stammdaten: stammdaten,
+           fuelleFahrzeugSelect: fuelleFahrzeugSelect, fuelleFahrerSelect: fuelleFahrerSelect, fahrzeugAusListe: fahrzeugAusListe,
+           verkleinereBild: verkleinereBild, fotoFeld: fotoFeld, Skizze: Skizze, kmPruefer: kmPruefer, overlay: overlay, menue: menue, multiselect: multiselect,
+           schadenZeile: schadenZeile, statusInfo: statusInfo, statusChip: statusChip };
+})();
+</script>
   <script>
     // ====== KONFIGURATION ======
-    // Nach dem Veröffentlichen des Apps-Scripts hier die /exec-URL einfügen:
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqMTED8H5V2lC35eCflbXoc9_k6WtOHQtNH5JYyvNqvwINOz4oVy8fvTwvl2kFWRpo/exec";
+    const APPS_SCRIPT_URL = window.FP_BACKEND_URL || "https://script.google.com/macros/s/AKfycbzqMTED8H5V2lC35eCflbXoc9_k6WtOHQtNH5JYyvNqvwINOz4oVy8fvTwvl2kFWRpo/exec";
+    FP.api.url = APPS_SCRIPT_URL;
+    const APP_VERSION = "4.0";
+    const WARN_OPTIONEN = ["Reifendruck", "Motorkontrollleuchte", "Öl", "Inspektion"];
+    const FOTO_MAX_KANTE = 1600, FOTO_QUALITAET = 0.7;
+    const $ = (id) => document.getElementById(id);
 
-    // Warnleuchten / Meldungen zur Auswahl
-    const WARN_OPTIONEN = [
-      "Reifendruck",
-      "Motorkontrollleuchte",
-      "Öl",
-      "Inspektion"
-    ];
+    // ====== ZUSTAND ======
+    let stamm = null;              // { fahrzeuge, fahrer, grenzen }
+    let modus = "liste";           // "liste" (Auswahl aus Stammdaten) | "frei" (Fallback ohne Backend)
+    let info = null;               // Antwort action=fahrzeug
+    let bekannte = [];             // offene Schäden aus dem Register
+    let neue = [];                 // [{ x, y, text, foto }]
+    let anfrageNr = 0;
+    let uebermittlungsId = null;
+    const fotos = { vorne: null, hinten: null, innenV: null, innenH: null };
 
-    // Maße/Qualität für die Foto-Komprimierung
-    const FOTO_MAX_KANTE = 1600;
-    const FOTO_QUALITAET = 0.7;
+    $("datumAnzeige").textContent = FP.datumLang();
+    if (stamm === null && stamm !== undefined) { /* Grenzen kommen mit den Stammdaten */ }
 
-    // ====== STANDARDWERTE ======
-    document.getElementById("datum").valueAsDate = new Date();
+    // ====== FOTOS ======
+    const fotoFelder = {
+      vorne:  FP.fotoFeld($("fotoVorne"), $("btnVorne"), $("previewVorne"), (d) => fotos.vorne = d, FOTO_MAX_KANTE, FOTO_QUALITAET),
+      hinten: FP.fotoFeld($("fotoHinten"), $("btnHinten"), $("previewHinten"), (d) => fotos.hinten = d, FOTO_MAX_KANTE, FOTO_QUALITAET),
+      innenV: FP.fotoFeld($("fotoInnenVorne"), $("btnInnenVorne"), $("previewInnenVorne"), (d) => fotos.innenV = d, FOTO_MAX_KANTE, FOTO_QUALITAET),
+      innenH: FP.fotoFeld($("fotoInnenHinten"), $("btnInnenHinten"), $("previewInnenHinten"), (d) => fotos.innenH = d, FOTO_MAX_KANTE, FOTO_QUALITAET)
+    };
 
-    // ====== FOTOS: Komprimieren + Vorschau ======
-    let fotoVorneData = null;
-    let fotoHintenData = null;
-
-    function verkleinereBild(file, maxKante, qualitaet) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const img = new Image();
-          img.onload = () => {
-            let w = img.width, h = img.height;
-            if (w >= h && w > maxKante) { h = Math.round(h * maxKante / w); w = maxKante; }
-            else if (h > w && h > maxKante) { w = Math.round(w * maxKante / h); h = maxKante; }
-            const canvas = document.createElement("canvas");
-            canvas.width = w; canvas.height = h;
-            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-            resolve(canvas.toDataURL("image/jpeg", qualitaet));
-          };
-          img.onerror = reject;
-          img.src = reader.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    function fotoHandler(inputId, btnId, previewId, setter) {
-      const input = document.getElementById(inputId);
-      const btn = document.getElementById(btnId);
-      const preview = document.getElementById(previewId);
-      input.addEventListener("change", async () => {
-        const file = input.files[0];
-        if (!file) return;
-        btn.textContent = "⏳ Foto wird verarbeitet…";
-        try {
-          const dataUrl = await verkleinereBild(file, FOTO_MAX_KANTE, FOTO_QUALITAET);
-          setter(dataUrl);
-          preview.src = dataUrl;
-          preview.classList.add("sichtbar");
-          btn.textContent = "✓ Foto gesetzt — neu aufnehmen";
-          btn.classList.add("gesetzt");
-        } catch (e) {
-          btn.textContent = "📷 Foto aufnehmen / wählen";
-          alert("Das Bild konnte nicht verarbeitet werden. Bitte erneut versuchen.");
-        }
-      });
-    }
-    let fotoInnenVorneData = null;
-    let fotoInnenHintenData = null;
-    fotoHandler("fotoVorne", "btnVorne", "previewVorne", (d) => fotoVorneData = d);
-    fotoHandler("fotoHinten", "btnHinten", "previewHinten", (d) => fotoHintenData = d);
-    fotoHandler("fotoInnenVorne", "btnInnenVorne", "previewInnenVorne", (d) => fotoInnenVorneData = d);
-    fotoHandler("fotoInnenHinten", "btnInnenHinten", "previewInnenHinten", (d) => fotoInnenHintenData = d);
-
-    // ====== KONTROLLART (Arbeitsbeginn / Arbeitsende) ======
-    function kontrollart() {
-      const r = document.querySelector('input[name="kontrollart"]:checked');
-      return r ? r.value : "";
-    }
+    // ====== KONTROLLART ======
+    function kontrollart() { const r = document.querySelector('input[name="kontrollart"]:checked'); return r ? r.value : ""; }
     function aktualisiereArt() {
       const ende = kontrollart() === "Arbeitsende";
-      // Fotos vorne/hinten sind bei Arbeitsende optional
       document.querySelectorAll("[data-optional-ende]").forEach((el) => (el.hidden = !ende));
-      document.getElementById("submitBtn").textContent =
-        kontrollart() ? kontrollart() + " absenden" : "Kontrolle absenden";
-      zeigeVorgaenger();
+      $("submitBtn").textContent = kontrollart() ? kontrollart() + " absenden" : "Kontrolle absenden";
     }
-    document.querySelectorAll('input[name="kontrollart"]').forEach((r) =>
-      r.addEventListener("change", aktualisiereArt));
+    document.querySelectorAll('input[name="kontrollart"]').forEach((r) => r.addEventListener("change", aktualisiereArt));
 
-    // ====== NAME MERKEN (nur auf diesem Handy) ======
-    const nameInput = document.getElementById("name");
-    try { nameInput.value = localStorage.getItem("fk_name") || ""; } catch (e) {}
-    nameInput.addEventListener("change", () => {
-      try { localStorage.setItem("fk_name", nameInput.value.trim()); } catch (e) {}
-      ladeVorgaenger();
+    // ====== NAME ======
+    const nameSel = $("name"), nameFrei = $("nameFrei");
+    function aktuellerName() {
+      if (modus === "frei" || nameSel.value === "__andere__") return nameFrei.value.trim().replace(/\s+/g, " ");
+      return nameSel.value;
+    }
+    nameSel.addEventListener("change", () => {
+      nameFrei.hidden = nameSel.value !== "__andere__";
+      if (nameSel.value === "__andere__") nameFrei.focus();
+      FP.speicher("fp_name", aktuellerName());
+      ladeFahrzeug();
     });
+    nameFrei.addEventListener("change", () => { FP.speicher("fp_name", aktuellerName()); ladeFahrzeug(); });
 
-    // ====== VORGÄNGER ANZEIGEN ======
-    let vorgaenger = null;       // letzte Kontrolle einer anderen Person
-    let vorgaengerAnfrage = 0;
-
-    function fahrzeugText() {
-      const pre = document.getElementById("fahrzeug-prefix").value;
-      const nr = document.getElementById("fahrzeug-nummer").value.trim();
-      return pre && nr ? pre + "-VM " + nr : "";
-    }
-
-    function esc(s) {
-      return String(s || "").replace(/[&<>"']/g, (c) =>
-        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-    }
-
-    async function ladeVorgaenger() {
-      const fzg = fahrzeugText();
-      const box = document.getElementById("vorgaengerBox");
-      vorgaenger = null;
-      if (!fzg || APPS_SCRIPT_URL.startsWith("HIER_DEINE")) { box.hidden = true; return; }
-      const nr = ++vorgaengerAnfrage;
-      box.hidden = false;
-      box.className = "vorgaenger";
-      box.textContent = "⏳ Letzte Übergabe wird geladen…";
-      try {
-        const url = APPS_SCRIPT_URL + "?fahrzeug=" + encodeURIComponent(fzg) +
-                    "&name=" + encodeURIComponent(nameInput.value.trim());
-        const res = await fetch(url);
-        const json = await res.json();
-        if (nr !== vorgaengerAnfrage) return;          // veraltete Antwort
-        vorgaenger = json.status === "ok" ? json.letzte : null;
-      } catch (e) {
-        if (nr !== vorgaengerAnfrage) return;
-        vorgaenger = null;
+    // ====== FAHRZEUG ======
+    const fzgSel = $("fahrzeug");
+    function aktuellesFahrzeug() {
+      if (modus === "frei") {
+        const p = $("fahrzeug-prefix").value, n = $("fahrzeug-nummer").value.trim();
+        return p && n ? p + "-VM " + n : "";
       }
-      zeigeVorgaenger();
+      return fzgSel.value;
+    }
+    function fahrzeugStamm() { return stamm ? FP.fahrzeugAusListe(stamm.fahrzeuge, aktuellesFahrzeug()) : null; }
+    fzgSel.addEventListener("change", ladeFahrzeug);
+    ["fahrzeug-prefix", "fahrzeug-nummer"].forEach((id) => $(id).addEventListener("change", ladeFahrzeug));
+
+    function setzeModus(m) {
+      modus = m;
+      const frei = m === "frei";
+      nameSel.hidden = frei; nameFrei.hidden = !frei && nameSel.value !== "__andere__";
+      fzgSel.hidden = frei; $("fahrzeugFrei").hidden = !frei;
+      if (frei) nameFrei.value = nameFrei.value || FP.speicher("fp_name") || "";
     }
 
-    function zeigeVorgaenger() {
-      const box = document.getElementById("vorgaengerBox");
-      if (!fahrzeugText()) { box.hidden = true; return; }
-      box.hidden = false;
-      box.className = "vorgaenger";
-      if (!vorgaenger) {
-        box.textContent = "Kein vorheriger Fahrer für dieses Fahrzeug gefunden.";
+    // Stammdaten laden (Cache sofort, Backend im Hintergrund)
+    FP.stammdaten((daten, quelle) => {
+      if (!daten) {
+        setzeModus("frei");
+        $("vorgaengerBox").hidden = false; $("vorgaengerBox").className = "box warn";
+        $("vorgaengerBox").textContent = "Fahrzeug- und Fahrerliste konnten nicht geladen werden (kein Netz?). Bitte Name und Fahrzeug eintippen – die Kontrolle kann trotzdem gesendet werden.";
         return;
       }
-      const v = vorgaenger;
+      stamm = daten;
+      if (daten.grenzen) Object.assign(FP_GRENZEN, daten.grenzen);
+      setzeModus("liste");
+      FP.fuelleFahrzeugSelect(fzgSel, daten.fahrzeuge, { ohneVerliehen: false });
+      FP.fuelleFahrerSelect(nameSel, daten.fahrer, true);
+      const gemerkt = FP.speicher("fp_name") || "";
+      if (gemerkt && !nameSel.value) {
+        const inListe = (daten.fahrer || []).some((f) => f.name === gemerkt);
+        if (inListe) nameSel.value = gemerkt;
+        else if (gemerkt) { nameSel.value = "__andere__"; nameFrei.hidden = false; nameFrei.value = gemerkt; }
+      }
+      if (!(daten.fahrer || []).length) { nameSel.value = "__andere__"; nameFrei.hidden = false; nameFrei.value = nameFrei.value || gemerkt; }
+      // Browser hat das Formular nach einem Neuladen wiederhergestellt -> Fahrzeugdaten nachladen
+      if (fzgSel.value && !info) ladeFahrzeug();
+    });
+    // Mausrad über einem Zahlenfeld darf den Wert nicht verstellen (Desktop)
+    document.addEventListener("wheel", (e) => { if (e.target.type === "number" && document.activeElement === e.target) e.target.blur(); }, { passive: true });
+
+    // ====== FAHRZEUG-INFO (Vorgänger, bekannte Schäden, km-Referenz) ======
+    const vgBox = $("vorgaengerBox");
+    const skizze = FP.Skizze($("skizzeWrap"), {
+      interaktiv: () => neuSchadenAktiv(),
+      onNeu: (x, y) => { neue.push({ x, y, text: "", foto: null }); renderNeue(); },
+      onMarkerTap: (m, idx, istNeu) => {
+        const zeile = istNeu ? $("neueListe").children[idx] : $("bekannteListe").children[idx];
+        document.querySelectorAll(".marker-zeile.aktiv").forEach((z) => z.classList.remove("aktiv"));
+        if (zeile) { zeile.classList.add("aktiv"); zeile.scrollIntoView({ behavior: "smooth", block: "center" }); }
+      }
+    });
+
+    async function ladeFahrzeug() {
+      const kz = aktuellesFahrzeug();
+      info = null; bekannte = []; neue = []; renderNeue();
+      kmPr.pruefe();
+      if (!kz) { vgBox.hidden = true; $("schaedenGroup").hidden = true; $("neuGroup").hidden = true; return; }
+      const nr = ++anfrageNr;
+      vgBox.hidden = false; vgBox.className = "box"; vgBox.textContent = "⏳ Letzte Übergabe und bekannte Schäden werden geladen…";
+      zeigeSchaeden();
+      try {
+        const j = await FP.get({ action: "fahrzeug", kennzeichen: kz, name: aktuellerName() });
+        if (nr !== anfrageNr) return;
+        if (j.status !== "ok") throw new Error(j.message || "Fehler");
+        info = j;
+        bekannte = (j.schaeden || []).map((s) => ({ id: s.id, x: s.x, y: s.y, text: s.beschreibung, status: s.status, von: s.von, am: s.am, foto: s.foto, quelle: s.quelle }));
+        zeigeVorgaenger(j);
+        zeigeSchaeden();
+        kmPr.pruefe();
+      } catch (e) {
+        if (nr !== anfrageNr) return;
+        vgBox.className = "box warn";
+        vgBox.textContent = "Keine Verbindung – Vorgänger und bekannte Schäden konnten nicht geladen werden. Die Kontrolle kann trotzdem gesendet werden.";
+        zeigeSchaeden();
+      }
+    }
+
+    function zeigeVorgaenger(j) {
+      vgBox.hidden = false; vgBox.className = "box";
+      const v = j.vorgaenger;
+      let html = "";
+      if (j.stamm === null && modus === "frei") html += '<span class="box-titel" style="color:#9b2c2c">Achtung</span>Dieses Kennzeichen steht nicht in den Stammdaten – bitte prüfen.<br>';
+      if (!v) { vgBox.innerHTML = html + "Kein vorheriger Fahrer für dieses Fahrzeug gefunden."; return; }
       const links = [];
-      if (v.fotoInnenVorne)  links.push('<a href="' + esc(v.fotoInnenVorne) + '" target="_blank" rel="noopener">Innenraum vorne</a>');
-      if (v.fotoInnenHinten) links.push('<a href="' + esc(v.fotoInnenHinten) + '" target="_blank" rel="noopener">Innenraum hinten</a>');
-      box.innerHTML =
-        '<span class="vg-titel">Vorheriger Fahrer</span>' +
-        '<span class="vg-name">' + esc(v.name.trim()) + '</span>' +
-        (v.art ? esc(v.art) + " · " : "") + esc(v.zeit) +
-        (links.length ? "<br>Seine Fotos: " + links.join(" · ") : "");
+      if (v.fotoInnenVorne) links.push('<a href="' + FP.esc(v.fotoInnenVorne) + '" target="_blank" rel="noopener">Innenraum vorne</a>');
+      if (v.fotoInnenHinten) links.push('<a href="' + FP.esc(v.fotoInnenHinten) + '" target="_blank" rel="noopener">Innenraum hinten</a>');
+      vgBox.innerHTML = html + '<span class="box-titel">Vorheriger Fahrer</span><span class="vg-name">' + FP.esc(String(v.name || "").trim()) + "</span>" +
+        (v.art ? FP.esc(v.art) + " · " : "") + FP.esc(v.zeit) + (v.km ? " · " + fpKmFormat(v.km) + " km" : "") +
+        (links.length ? "<br>Fotos: " + links.join(" · ") : "");
     }
 
-    ["fahrzeug-prefix", "fahrzeug-nummer"].forEach((id) =>
-      document.getElementById(id).addEventListener("change", ladeVorgaenger));
-
-
-
-    // ====== BEDINGTE FELDER ======
-    const schaedenSel = document.getElementById("schaeden");
-    const schadenBox = document.getElementById("schadenBox");
-    const schadenText = document.getElementById("schadenText");
-    schaedenSel.addEventListener("change", () => {
-      const ja = schaedenSel.value === "Ja";
-      schadenBox.style.display = ja ? "block" : "none";
-      if (!ja) schadenText.value = "";
-    });
-
-
-
-    // ====== MEHRFACHAUSWAHL (Warnleuchten) ======
-    const msToggle = document.getElementById("msToggle");
-    const msPanel = document.getElementById("msPanel");
-    const msLabel = document.getElementById("msLabel");
-
-    WARN_OPTIONEN.forEach((opt) => {
-      const lbl = document.createElement("label");
-      lbl.className = "ms-option";
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.value = opt;
-      cb.addEventListener("change", aktualisiereWarnLabel);
-      lbl.appendChild(cb);
-      lbl.appendChild(document.createTextNode(opt));
-      msPanel.appendChild(lbl);
-    });
-
-    function ausgewaehlteWarnungen() {
-      return Array.from(msPanel.querySelectorAll("input:checked")).map((c) => c.value);
+    // Bekannte Schäden (grau/orange) + Skizze; wird auch für neue Schäden genutzt
+    function zeigeSchaeden() {
+      const st = fahrzeugStamm();
+      const bild = st && st.skizze ? st.skizze : (info && info.stamm && info.stamm.skizze) || "";
+      $("schaedenGroup").hidden = false; $("neuGroup").hidden = false;
+      skizze.setBild(bild);
+      skizze.setMarker(bekannte, neue);
+      $("skizzeHinweis").hidden = !bild;
+      const liste = $("bekannteListe");
+      $("schaedenTitel").textContent = bekannte.length ? "Bekannte Schäden (" + bekannte.length + ")" : "Bekannte Schäden";
+      if (!info) { liste.innerHTML = ""; $("gesehenRow").hidden = true; return; }
+      if (!bekannte.length) { liste.innerHTML = '<div class="box ok">✓ Keine bekannten Schäden erfasst.</div>'; $("gesehenRow").hidden = true; return; }
+      liste.innerHTML = bekannte.map((m, i) => FP.schadenZeile(m, i + 1, String(m.status).toLowerCase() === "offen" ? "gemeldet" : "alt")).join("");
+      Array.prototype.forEach.call(liste.children, (z, i) => z.addEventListener("click", () => skizze.setAktiv(i)));
+      $("gesehenRow").hidden = false;
     }
 
-    function aktualisiereWarnLabel() {
-      const sel = ausgewaehlteWarnungen();
-      if (sel.length === 0) {
-        msLabel.textContent = "Keine ausgewählt";
-        msLabel.classList.add("placeholder");
-      } else {
-        msLabel.textContent = sel.length === 1 ? sel[0] : sel.length + " ausgewählt";
-        msLabel.classList.remove("placeholder");
-      }
+    // ====== NEUE SCHÄDEN ======
+    function neuSchadenAktiv() { const r = document.querySelector('input[name="neuSchaden"]:checked'); return !!r && r.value === "Ja"; }
+    document.querySelectorAll('input[name="neuSchaden"]').forEach((r) => r.addEventListener("change", () => {
+      $("neuBereich").hidden = !neuSchadenAktiv();
+      if (!neuSchadenAktiv()) { neue = []; }
+      renderNeue();
+    }));
+    $("btnNeuOhnePosition").addEventListener("click", () => { neue.push({ x: null, y: null, text: "", foto: null }); renderNeue(); });
+
+    function renderNeue() {
+      const hatSkizze = !!skizze.zustand.bild;
+      $("neuHinweis").innerHTML = hatSkizze
+        ? "Tippe in der Skizze oben auf die Stelle, wo der neue Schaden ist (roter Punkt). Dann kurz beschreiben und ein Foto machen."
+        : "Für dieses Fahrzeug gibt es keine Skizze – bitte den Schaden unten beschreiben und ein Foto machen.";
+      $("btnNeuOhnePosition").textContent = hatSkizze ? "+ Schaden ohne Position in der Skizze" : "+ Schaden hinzufügen";
+      skizze.setMarker(bekannte, neue);
+      const liste = $("neueListe");
+      liste.innerHTML = "";
+      neue.forEach((m, i) => {
+        const z = document.createElement("div");
+        z.className = "marker-zeile neu";
+        z.innerHTML = '<span class="marker-nr">' + (bekannte.length + i + 1) + '</span><div class="marker-inhalt">' +
+          '<input type="text" placeholder="Was ist beschädigt? Wo genau?" value="' + FP.esc(m.text) + '" />' +
+          '<label class="foto-btn" for="fotoNeu' + i + '">📷 Foto vom Schaden (Pflicht)</label><input type="file" id="fotoNeu' + i + '" accept="image/*" capture="environment" hidden />' +
+          '<img class="foto-preview" alt="Vorschau Schaden" />' +
+          '<div class="marker-aktionen"><button type="button" class="btn klein danger">Entfernen</button></div></div>';
+        const inp = z.querySelector("input[type=text]");
+        inp.addEventListener("input", () => (m.text = inp.value));
+        const f = FP.fotoFeld(z.querySelector("input[type=file]"), z.querySelector(".foto-btn"), z.querySelector(".foto-preview"), (d) => (m.foto = d), 1280, 0.65);
+        if (m.foto) { z.querySelector(".foto-preview").src = m.foto; z.querySelector(".foto-preview").classList.add("sichtbar"); z.querySelector(".foto-btn").textContent = "✓ Foto gesetzt — neu aufnehmen"; z.querySelector(".foto-btn").classList.add("gesetzt"); }
+        z.querySelector(".btn.danger").addEventListener("click", () => { neue.splice(i, 1); renderNeue(); });
+        liste.appendChild(z);
+      });
     }
 
-    msToggle.addEventListener("click", () => {
-      const offen = msPanel.classList.toggle("open");
-      msToggle.setAttribute("aria-expanded", offen ? "true" : "false");
-    });
-    document.addEventListener("click", (e) => {
-      if (!document.getElementById("msWarn").contains(e.target)) {
-        msPanel.classList.remove("open");
-        msToggle.setAttribute("aria-expanded", "false");
-      }
-    });
+    // ====== KILOMETERSTAND ======
+    const kmPr = FP.kmPruefer($("kilometerstand"), $("kmBox"), () => (info && info.kmReferenz) || null);
+
+    // ====== WARNLEUCHTEN ======
+    const warn = FP.multiselect($("msToggle"), $("msPanel"), $("msLabel"), WARN_OPTIONEN);
 
     // ====== ABSENDEN ======
-    document.getElementById("kontrollForm").addEventListener("submit", async (e) => {
+    let sendeLaeuft = false;
+    $("kontrollForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const btn = document.getElementById("submitBtn");
-      const status = document.getElementById("status");
-      status.className = "status";
-      status.textContent = "";
+      const status = $("status"), btn = $("submitBtn");
+      status.className = "status"; status.textContent = "";
+      const fehler = (txt, el) => { status.className = "status error"; status.textContent = txt; if (el) { el.classList.add("fehlt"); el.scrollIntoView({ behavior: "smooth", block: "center" }); } };
+      document.querySelectorAll(".fehlt").forEach((el) => el.classList.remove("fehlt"));
 
-      // Foto-Pflichtprüfung (zusätzlich zur Browser-Validierung)
-      if (!kontrollart()) {
-        status.className = "status error";
-        status.textContent = "Bitte oben Arbeitsbeginn oder Arbeitsende wählen.";
-        return;
+      if (!kontrollart()) return fehler("Bitte oben Arbeitsbeginn oder Arbeitsende wählen.");
+      if (!aktuellerName()) return fehler("Bitte deinen Namen wählen.", nameSel.hidden ? nameFrei : nameSel);
+      if (!aktuellesFahrzeug()) return fehler("Bitte das Fahrzeug wählen.", fzgSel.hidden ? $("fahrzeug-nummer") : fzgSel);
+      const kmFehler = kmPr.validiere();
+      if (kmFehler) return fehler(kmFehler, $("kilometerstand"));
+      if (bekannte.length && !$("gesehen").checked) return fehler("Bitte bestätigen, dass du die bekannten Schäden gesehen hast.", $("gesehenRow"));
+      if (neuSchadenAktiv()) {
+        if (!neue.length) return fehler("Bitte den neuen Schaden in der Skizze antippen oder „Schaden hinzufügen“ wählen.", $("neuBereich"));
+        for (let i = 0; i < neue.length; i++) {
+          if (!neue[i].text.trim()) return fehler("Bitte Schaden " + (bekannte.length + i + 1) + " kurz beschreiben.", $("neueListe").children[i]);
+          if (!neue[i].foto) return fehler("Bitte ein Foto von Schaden " + (bekannte.length + i + 1) + " aufnehmen.", $("neueListe").children[i]);
+        }
       }
-      if (kontrollart() === "Arbeitsbeginn" && (!fotoVorneData || !fotoHintenData)) {
-        status.className = "status error";
-        status.textContent = "Bitte beide Fotos (vorne und hinten) aufnehmen.";
-        return;
-      }
-      if (!fotoInnenVorneData || !fotoInnenHintenData) {
-        status.className = "status error";
-        status.textContent = "Bitte beide Innenraum-Fotos (vorne und hinten) aufnehmen.";
-        return;
-      }
-      if (schaedenSel.value === "Ja" && !schadenText.value.trim()) {
-        status.className = "status error";
-        status.textContent = "Bitte den Schaden kurz beschreiben.";
-        return;
-      }
+      if (kontrollart() === "Arbeitsbeginn" && (!fotos.vorne || !fotos.hinten)) return fehler("Bitte beide Fotos (vorne und hinten) aufnehmen.", $("btnVorne"));
+      if (!fotos.innenV || !fotos.innenH) return fehler("Bitte beide Innenraum-Fotos (vorne und hinten) aufnehmen.", $("btnInnenVorne"));
+      if (sendeLaeuft) return;
 
-      btn.disabled = true;
-      btn.textContent = "Wird gesendet…";
-
+      if (!uebermittlungsId) uebermittlungsId = FP.uid();
+      const km = kmPr.daten();
       const data = {
-        kontrollart:         kontrollart(),
-        fotoInnenVorne:      fotoInnenVorneData,
-        fotoInnenHinten:     fotoInnenHintenData,
-        name:               document.getElementById("name").value,
-        fahrzeug:            document.getElementById("fahrzeug-prefix").value + "-VM " + document.getElementById("fahrzeug-nummer").value,
-        datum:               document.getElementById("datum").value,
-        kilometerstand:      document.getElementById("kilometerstand").value,
-        schaeden:            schaedenSel.value,
-        schadenBeschreibung: schadenText.value.trim(),
-        meldungen:           ausgewaehlteWarnungen(),
-        notiz:               document.getElementById("notiz").value,
-        fotoVorne:           fotoVorneData,
-        fotoHinten:          fotoHintenData
+        typ: "kontrolle", version: APP_VERSION, uebermittlungsId,
+        kontrollart: kontrollart(), name: aktuellerName(), fahrzeug: aktuellesFahrzeug(), datum: FP.heuteIso(),
+        kilometerstand: $("kilometerstand").value, kmPruefung: km, kmBegruendung: km.begruendung,
+        bekannteGesehen: $("gesehen").checked, bekannteAnzahl: bekannte.length,
+        neueSchaeden: neue.map((m) => ({ x: m.x, y: m.y, text: m.text.trim(), foto: m.foto })),
+        schaeden: neue.length ? "Ja" : "Nein", schadenBeschreibung: neue.map((m) => m.text.trim()).join("; "),
+        meldungen: warn.werte(), notiz: $("notiz").value,
+        fotoVorne: fotos.vorne, fotoHinten: fotos.hinten, fotoInnenVorne: fotos.innenV, fotoInnenHinten: fotos.innenH
       };
 
-      // Demo-Modus, solange kein Backend verbunden ist
-      if (APPS_SCRIPT_URL.startsWith("HIER_DEINE")) {
-        console.log("DEMO – diese Daten würden gesendet:", data);
-        status.className = "status info";
-        status.textContent = "Demo-Modus: Backend noch nicht verbunden. Daten siehe Konsole.";
-        btn.disabled = false;
-        btn.textContent = "Kontrolle absenden";
-        return;
-      }
-
+      sendeLaeuft = true; btn.disabled = true; btn.textContent = "Wird gesendet…";
+      FP.overlay(true);
       try {
-        // Ohne eigenen Content-Type-Header -> "simple request", keine CORS-Preflight
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify(data)
-        });
-        const result = await res.json();
+        const result = await FP.post(data, 90000);
         if (result.status !== "ok") throw new Error(result.message || "Serverfehler");
-
         status.className = "status success";
-        status.textContent = data.kontrollart + " erfolgreich gespeichert!";
+        let html = "<b>" + FP.esc(data.kontrollart) + " erfolgreich gespeichert!</b>";
+        if (result.doppelt) html = "Diese Kontrolle war bereits gespeichert – kein doppelter Eintrag.";
+        const hinweise = (result.auffaelligkeiten || []).filter((a) => a.typ !== "Neuer Schaden");
+        if (hinweise.length) html += "<br>Hinweis an die Dispo:<ul>" + hinweise.map((a) => "<li>" + FP.esc(a.typ) + ": " + FP.esc(a.text) + "</li>").join("") + "</ul>";
+        if (result.schaeden) html += "<br>" + result.schaeden + " neue(r) Schaden/Schäden gemeldet – danke!";
+        status.innerHTML = html;
+        uebermittlungsId = null;
         formularZuruecksetzen();
-        btn.disabled = false;
-        return;
       } catch (err) {
         status.className = "status error";
-        status.textContent = "Fehler beim Senden. Bitte erneut versuchen.";
+        status.textContent = (err && err.name === "AbortError")
+          ? "Keine Antwort vom Server (Netz langsam?). Bitte nochmal auf „Absenden“ tippen – doppelte Einträge werden automatisch verhindert."
+          : "Fehler beim Senden. Bitte nochmal auf „Absenden“ tippen – doppelte Einträge werden automatisch verhindert.";
+      } finally {
+        FP.overlay(false); sendeLaeuft = false; btn.disabled = false; aktualisiereArt();
       }
-
-      btn.disabled = false;
-      aktualisiereArt();
+      status.scrollIntoView({ behavior: "smooth", block: "center" });
     });
 
     function formularZuruecksetzen() {
-      const gemerkterName = nameInput.value;
-      document.getElementById("kontrollForm").reset();
-      nameInput.value = gemerkterName;
-      document.getElementById("datum").valueAsDate = new Date();
-      fotoVorneData = null;
-      fotoHintenData = null;
-      fotoInnenVorneData = null;
-      fotoInnenHintenData = null;
-      vorgaenger = null;
-      document.getElementById("vorgaengerBox").hidden = true;
-      ["previewVorne", "previewHinten", "previewInnenVorne", "previewInnenHinten"].forEach((id) => {
-        const p = document.getElementById(id);
-        p.src = ""; p.classList.remove("sichtbar");
-      });
-      aktualisiereArt();
-      [["btnVorne"], ["btnHinten"], ["btnInnenVorne"], ["btnInnenHinten"]].forEach(([id]) => {
-        const b = document.getElementById(id);
-        b.textContent = "📷 Foto aufnehmen / wählen";
-        b.classList.remove("gesetzt");
-      });
-      schadenBox.style.display = "none";
-      msPanel.querySelectorAll("input:checked").forEach((c) => (c.checked = false));
-      aktualisiereWarnLabel();
+      const name = aktuellerName();
+      const frei = nameSel.value === "__andere__";
+      $("kontrollForm").reset();
+      if (modus === "frei") nameFrei.value = name; else if (frei) { nameSel.value = "__andere__"; nameFrei.hidden = false; nameFrei.value = name; } else nameSel.value = name;
+      Object.keys(fotos).forEach((k) => (fotos[k] = null));
+      Object.keys(fotoFelder).forEach((k) => fotoFelder[k].reset());
+      info = null; bekannte = []; neue = [];
+      vgBox.hidden = true; $("schaedenGroup").hidden = true; $("neuGroup").hidden = true; $("neuBereich").hidden = true;
+      skizze.setBild(""); skizze.setMarker([], []);
+      kmPr.reset(); warn.reset(); aktualisiereArt();
     }
+    aktualisiereArt();
   </script>
 </body>
 </html>
